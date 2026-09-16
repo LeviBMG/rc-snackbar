@@ -524,11 +524,16 @@
         "2. Pause / Vor 3. Std. Wirtschaft (10:25 - 10:40 Uhr)",
         "Mittagspause (13:30 - 13:45 Uhr)"
       ];
-    } else if (dayOfWeek === 2 || dayOfWeek === 5) { // DIENSTAG & FREITAG
+    } else if (dayOfWeek === 2) { // DIENSTAG
       options = [
         "1. Pause (09:10 - 09:25 Uhr)",
         "2. Pause (10:25 - 10:40 Uhr)",
         "Mittagspause (13:30 - 13:45 Uhr)"
+      ];
+    } else if (dayOfWeek === 5) { // FREITAG (Keine Mittagspause, keine 6. Pause)
+      options = [
+        "1. Pause (09:10 - 09:25 Uhr)",
+        "2. Pause (10:25 - 10:40 Uhr)"
       ];
     } else { // WOCHENENDE
       const el = document.createElement('option');

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RC-Snackbase eSG - Schulshop</title>
+  <title>RC-Snackbar eSG - Schulshop</title>
   <!-- jsPDF Bibliothek -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
@@ -307,40 +307,72 @@
     .cart-total { font-size: 1.2rem; font-weight: 800; color: var(--esg-orange); }
     .cart-limit-hint { font-size: 0.75rem; color: #94A3B8; }
 
-    /* FOOTER / RECHTLICHER ANHANG */
+    /* DEZENTE FUSSZEILE */
     footer {
-      background: var(--esg-navy);
-      color: white;
-      padding: 40px 20px 20px 20px;
+      background: var(--card-bg);
+      border-top: 1px solid var(--border);
+      padding: 16px 24px;
       margin-top: auto;
-      font-size: 0.8rem;
-    }
-
-    .footer-content {
-      max-width: 1100px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 30px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding-bottom: 24px;
-    }
-
-    @media (max-width: 768px) { .footer-content { grid-template-columns: 1fr; } }
-
-    .footer-col h4 {
-      color: var(--esg-orange);
-      margin-top: 0;
-      margin-bottom: 12px;
-      text-transform: uppercase;
-    }
-
-    .footer-bottom {
-      max-width: 1100px;
-      margin: 16px auto 0 auto;
       text-align: center;
+      font-size: 0.8rem;
       color: var(--esg-grey);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    @media (max-width: 600px) {
+      footer { flex-direction: column; gap: 8px; }
+    }
+
+    .btn-agb {
+      background: none;
+      border: 1px solid var(--esg-grey);
+      color: var(--esg-navy);
+      padding: 6px 12px;
+      border-radius: 6px;
       font-size: 0.75rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-agb:hover {
+      background: var(--esg-light-grey);
+    }
+
+    /* MODAL FÜR AGBs */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 16px;
+    }
+
+    .modal-card {
+      background: white;
+      border-radius: var(--radius);
+      max-width: 500px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .modal-card h3 {
+      margin-top: 0;
+      color: var(--esg-navy);
+    }
+
+    .modal-card p {
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: var(--text-muted);
     }
 
     .login-box { max-width: 400px; margin: 40px auto; }
@@ -353,7 +385,7 @@
     <div class="header-logo">
       <img src="esg_logo.png" alt="eSG Logo" onerror="this.src='https://via.placeholder.com/120x50?text=eSG+Logo'">
       <div class="header-title">
-        <h1>RC-Snackbase eSG</h1>
+        <h1>RC-Snackbar eSG</h1>
         <p>Schülergenossenschaft Raiffeisen-Campus eSG</p>
       </div>
     </div>
@@ -402,7 +434,7 @@
       <div class="news-banner">
         <div class="news-content">
           <h3>📢 eSG News & Aktionen</h3>
-          <p>Willkommen im Click & Collect Shop der RC-Snackbase eSG! Bestelle deine Pausensnacks einfach vor und hole sie pünktlich ab. Achte auf unsere aktuellen Aktionsangebote!</p>
+          <p>Willkommen im Click & Collect Shop der RC-Snackbar eSG! Bestelle deine Pausensnacks einfach vor und hole sie pünktlich ab. Achte auf unsere aktuellen Aktionsangebote!</p>
         </div>
         <div class="news-poster">
           <img src="poster_aktion.png" alt="Aktionsplakat" onerror="this.src='https://via.placeholder.com/200x120?text=Aktionsplakat+eSG'">
@@ -474,28 +506,20 @@
 
   </div>
 
-  <!-- RECHTLICHER ANHANG / FOOTER -->
+  <!-- AGB MODAL (POPUP) -->
+  <div id="agb-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <h3>AGBs & Rechtliche Hinweise</h3>
+      <p><strong>RC-Snackbar eSG</strong><br>Schülergenossenschaft am Raiffeisen-Campus Gymnasium Dernbach.</p>
+      <p>Bestellungen über diese Plattform sind verbindlich. Die Abholung der Ware erfolgt strikt gegen Vorzeigen des generierten digitalen Kassenzettels (PDF) zum gewählten Verkaufsfenster.</p>
+      <button class="btn-primary" style="width: 100%; margin-top: 16px;" onclick="toggleAgbModal(false)">Schließen</button>
+    </div>
+  </div>
+
+  <!-- DEZENTE FUSSZEILE -->
   <footer>
-    <div class="footer-content">
-      <div class="footer-col">
-        <h4>RC-Snackbase eSG</h4>
-        <p>Schülergenossenschaft am Raiffeisen-Campus Gymnasium Dernbach.</p>
-        <p>Praktische Wirtschaftserziehung im Geiste Friedrich Wilhelm Raiffeisens.</p>
-      </div>
-      <div class="footer-col">
-        <h4>Rechtliche Angaben</h4>
-        <p><strong>Vertretungsberechtigte Schüler:</strong> Vorstand der RC-Snackbase eSG</p>
-        <p><strong>Aufsichtsrat:</strong> Projektbetreuung Gymnasium Dernbach</p>
-        <p><strong>Sitz:</strong> Dernbach (Westerwald)</p>
-      </div>
-      <div class="footer-col">
-        <h4>Abhol- & Verkaufsbedingungen</h4>
-        <p>Bestellungen sind verbindlich. Die Ausgabe erfolgt strikt gegen Vorzeigen des digitalen Kassenzettels (PDF) am Verkaufspunkt.</p>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      &copy; 2026 RC-Snackbase eSG – Alle Rechte vorbehalten.
-    </div>
+    <span>&copy; 2026 RC-Snackbar eSG – Raiffeisen-Campus Dernbach</span>
+    <button class="btn-agb" onclick="toggleAgbModal(true)">AGBs & Rechtliches</button>
   </footer>
 
   <script>
@@ -511,6 +535,10 @@
     let currentUser = null;
 
     document.getElementById('pickupDate').min = new Date().toISOString().split('T')[0];
+
+    function toggleAgbModal(show) {
+      document.getElementById('agb-modal').classList.toggle('hidden', !show);
+    }
 
     function requireAuth() {
       if (!currentUser) {
@@ -539,7 +567,7 @@
       const password = document.getElementById('untisPass').value;
       const userClass = document.getElementById('untisClass').value.trim();
 
-      btn.innerText = "Verifziere mit WebUntis...";
+      btn.innerText = "Verifiziere mit WebUntis...";
       btn.disabled = true;
 
       try {
@@ -600,6 +628,7 @@
       showWindow('step-login');
     }
 
+    // SCHLICHTE PAUSENAUSWAHL
     function updatePauseOptions() {
       const dateInput = document.getElementById('pickupDate').value;
       const pauseSelect = document.getElementById('pickupPause');
@@ -614,29 +643,23 @@
 
       if (dayOfWeek === 1) { // MONTAG
         options = [
-          "1. Pause (09:10 - 09:25 Uhr)",
-          "2. Pause (10:25 - 10:40 Uhr)",
-          "Mittagspause / Vor 6. Std. Wirtschaft (13:30 - 13:45 Uhr)",
-          "6. Pause (Nach 6. Std. Wirtschaft / 15:00 Uhr)"
+          "1. Pause",
+          "2. Pause",
+          "Mittagspause",
+          "6. Pause (Letzte Pause)"
         ];
-      } else if (dayOfWeek === 3 || dayOfWeek === 4) { // MITTWOCH & DONNERSTAG
+      } else if (dayOfWeek === 2 || dayOfWeek === 3 || dayOfWeek === 4) { // DIENSTAG, MITTWOCH, DONNERSTAG
         options = [
-          "1. Pause (09:10 - 09:25 Uhr)",
-          "2. Pause / Vor 3. Std. Wirtschaft (10:25 - 10:40 Uhr)",
-          "Mittagspause (13:30 - 13:45 Uhr)"
-        ];
-      } else if (dayOfWeek === 2) { // DIENSTAG
-        options = [
-          "1. Pause (09:10 - 09:25 Uhr)",
-          "2. Pause (10:25 - 10:40 Uhr)",
-          "Mittagspause (13:30 - 13:45 Uhr)"
+          "1. Pause",
+          "2. Pause",
+          "Mittagspause"
         ];
       } else if (dayOfWeek === 5) { // FREITAG
         options = [
-          "1. Pause (09:10 - 09:25 Uhr)",
-          "2. Pause (10:25 - 10:40 Uhr)"
+          "1. Pause",
+          "2. Pause"
         ];
-      } else {
+      } else { // WOCHENENDE
         const el = document.createElement('option');
         el.value = "";
         el.innerText = "Am Wochenende findet kein Verkauf statt!";
@@ -799,7 +822,7 @@
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(13);
-      doc.text("RC-SNACKBASE eSG", 40, 12, { align: "center" });
+      doc.text("RC-SNACKBAR eSG", 40, 12, { align: "center" });
 
       doc.setFontSize(8);
       doc.setFont("helvetica", "normal");

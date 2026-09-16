@@ -3,19 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RC Snackbar - Click & Collect</title>
-  <!-- jsPDF Bibliothek für automatische PDF-Kassenzettel -->
+  <title>RC-Snackbase eSG - Schulshop</title>
+  <!-- jsPDF Bibliothek -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root {
-      --primary: #FF6B00;
-      --primary-hover: #E05E00;
-      --bg: #F4F5F7;
+      --esg-navy: #1B2B4C;
+      --esg-orange: #E87722;
+      --esg-orange-hover: #D06310;
+      --esg-grey: #8A8D8F;
+      --esg-light-grey: #F2F4F7;
+      --bg: #F8FAFC;
       --card-bg: #FFFFFF;
-      --text: #17191C;
-      --text-muted: #7A869A;
+      --text: #0F172A;
+      --text-muted: #64748B;
       --border: #E2E8F0;
-      --radius: 16px;
+      --radius: 12px;
     }
 
     * {
@@ -27,32 +30,57 @@
       background-color: var(--bg);
       color: var(--text);
       margin: 0;
-      padding: 20px 16px;
+      padding: 0;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--card-bg);
+      border-bottom: 2px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .header-logo img {
+      height: 48px;
+      object-fit: contain;
+    }
+
+    .header-title h1 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--esg-navy);
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .header-title p {
+      font-size: 0.75rem;
+      color: var(--esg-grey);
+      margin: 2px 0 0 0;
+      font-weight: 600;
     }
 
     .container {
       width: 100%;
-      max-width: 1000px;
-    }
-
-    header {
-      text-align: center;
-      margin-bottom: 24px;
-    }
-
-    header h1 {
-      font-size: 1.8rem;
-      font-weight: 700;
-      margin: 0;
-      color: var(--text);
-    }
-
-    header p {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      margin-top: 4px;
+      max-width: 1100px;
+      margin: 24px auto;
+      padding: 0 16px;
+      flex: 1;
     }
 
     .card {
@@ -60,85 +88,110 @@
       border-radius: var(--radius);
       padding: 24px;
       border: 1px solid var(--border);
-      margin-bottom: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(27, 43, 76, 0.04);
     }
 
     .card h2 {
-      font-size: 1.2rem;
+      font-size: 1.15rem;
+      color: var(--esg-navy);
       margin-top: 0;
       margin-bottom: 16px;
+      border-bottom: 2px solid var(--esg-light-grey);
+      padding-bottom: 8px;
     }
 
-    .login-container {
-      max-width: 400px;
-      margin: 40px auto;
-    }
-
-    .user-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #E2E8F0;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: 600;
-    }
-
-    .action-banner {
-      background: #FFF5EE;
-      border: 1.5px solid var(--primary);
+    /* NEWS & WERBEBANNER SECTION */
+    .news-banner {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      background: linear-gradient(135deg, #1B2B4C 0%, #2A4373 100%);
+      color: white;
       border-radius: var(--radius);
-      padding: 16px 20px;
+      padding: 24px;
       margin-bottom: 24px;
     }
 
-    .action-banner h2 {
-      color: var(--primary);
-      margin: 0 0 12px 0;
-      font-size: 1.1rem;
+    @media (max-width: 768px) {
+      .news-banner { grid-template-columns: 1fr; }
     }
 
-    /* 4 Produkte pro Zeile */
+    .news-content h3 {
+      color: var(--esg-orange);
+      margin-top: 0;
+      font-size: 1.3rem;
+    }
+
+    .news-content p {
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: #E2E8F0;
+    }
+
+    .news-poster {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 8px;
+      border: 1px dashed rgba(255, 255, 255, 0.3);
+    }
+
+    .news-poster img {
+      max-width: 100%;
+      max-height: 160px;
+      object-fit: contain;
+      border-radius: 4px;
+    }
+
+    /* PRODUKT GRID */
     .product-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 16px;
     }
 
-    @media (max-width: 900px) {
-      .product-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-
-    @media (max-width: 500px) {
-      .product-grid { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 900px) { .product-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 500px) { .product-grid { grid-template-columns: 1fr; } }
 
     .product-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
+      border-radius: var(--radius);
+      padding: 14px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       text-align: center;
       position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    .product-badge {
+    .product-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(27, 43, 76, 0.08);
+    }
+
+    .product-card.sold-out {
+      opacity: 0.6;
+      filter: grayscale(80%);
+    }
+
+    .badge {
       position: absolute;
-      top: 8px;
-      left: 8px;
-      background: rgba(255, 107, 0, 0.15);
-      color: var(--primary);
+      top: 10px;
+      left: 10px;
       font-size: 0.65rem;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 12px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
       text-transform: uppercase;
     }
+
+    .badge-action { background: var(--esg-orange); color: white; }
+    .badge-out { background: #E53E3E; color: white; }
 
     .product-img-wrap {
       width: 100%;
@@ -146,8 +199,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 8px;
-      margin-top: 8px;
+      margin: 12px 0;
     }
 
     .product-img-wrap img {
@@ -157,9 +209,9 @@
     }
 
     .product-title {
-      font-size: 0.95rem;
-      font-weight: 600;
-      margin: 4px 0;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--esg-navy);
       min-height: 2.4em;
       display: flex;
       align-items: center;
@@ -168,9 +220,9 @@
 
     .product-price {
       font-size: 1rem;
-      font-weight: 700;
-      color: var(--primary);
-      margin-bottom: 8px;
+      font-weight: 800;
+      color: var(--esg-orange);
+      margin-bottom: 10px;
     }
 
     .qty-controls {
@@ -181,612 +233,675 @@
     }
 
     .qty-btn {
-      background: var(--bg);
+      background: var(--esg-light-grey);
       border: 1px solid var(--border);
-      width: 30px;
-      height: 30px;
+      width: 32px;
+      height: 32px;
       border-radius: 6px;
       font-weight: bold;
       cursor: pointer;
-      font-size: 1rem;
+      color: var(--esg-navy);
     }
 
-    .qty-btn:hover { background: #E2E8F0; }
-
-    .qty-display {
-      font-weight: 600;
-      width: 20px;
-      text-align: center;
-    }
+    .qty-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
     .btn-primary {
-      width: 100%;
-      background: var(--primary);
+      background: var(--esg-orange);
       color: white;
       border: none;
-      padding: 14px;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 600;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 700;
       cursor: pointer;
       transition: background 0.2s;
     }
 
-    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:hover { background: var(--esg-orange-hover); }
 
     .btn-secondary {
       background: none;
       border: none;
-      color: var(--text-muted);
+      color: var(--esg-grey);
       cursor: pointer;
-      font-size: 0.9rem;
-      margin-bottom: 12px;
+      font-weight: 600;
       padding: 0;
     }
 
-    .form-group { margin-bottom: 14px; }
+    .form-group { margin-bottom: 16px; }
 
     label {
       display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--esg-navy);
       margin-bottom: 6px;
+      text-transform: uppercase;
     }
 
     input, select {
       width: 100%;
       padding: 12px;
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 8px;
       font-size: 0.95rem;
       background: #FAFAFA;
-      outline: none;
-    }
-
-    input:focus, select:focus {
-      border-color: var(--primary);
-      background: #FFF;
     }
 
     .hidden { display: none !important; }
 
-    .sticky-bar {
+    /* EINKAUFSWAGEN BOTTOM-BAR */
+    .cart-bar {
       position: sticky;
       bottom: 16px;
-      background: var(--card-bg);
-      border: 1px solid var(--border);
+      background: var(--esg-navy);
+      color: white;
       border-radius: var(--radius);
-      padding: 16px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      padding: 16px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
     }
 
-    .total-info { font-size: 1.1rem; font-weight: 700; }
-    
-    .error-msg {
-      color: #E53E3E;
-      font-size: 0.85rem;
-      margin-top: 8px;
+    .cart-info { display: flex; flex-direction: column; }
+    .cart-total { font-size: 1.2rem; font-weight: 800; color: var(--esg-orange); }
+    .cart-limit-hint { font-size: 0.75rem; color: #94A3B8; }
+
+    /* FOOTER / RECHTLICHER ANHANG */
+    footer {
+      background: var(--esg-navy);
+      color: white;
+      padding: 40px 20px 20px 20px;
+      margin-top: auto;
+      font-size: 0.8rem;
     }
+
+    .footer-content {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 24px;
+    }
+
+    @media (max-width: 768px) { .footer-content { grid-template-columns: 1fr; } }
+
+    .footer-col h4 {
+      color: var(--esg-orange);
+      margin-top: 0;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    .footer-bottom {
+      max-width: 1100px;
+      margin: 16px auto 0 auto;
+      text-align: center;
+      color: var(--esg-grey);
+      font-size: 0.75rem;
+    }
+
+    .login-box { max-width: 400px; margin: 40px auto; }
   </style>
 </head>
 <body>
 
-<div class="container">
+  <!-- HEADER -->
   <header>
-    <h1>RC Snackbar</h1>
-    <p>Click & Collect – Raiffeisen-Campus Dernbach eSG</p>
-    <div id="auth-status" class="hidden" style="margin-top: 8px;">
-      <span class="user-badge">👤 <span id="logged-user-name"></span> (<span id="logged-user-class"></span>)</span>
-      <button class="btn-secondary" style="margin: 0 0 0 8px; text-decoration: underline;" onclick="logout()">Abmelden</button>
+    <div class="header-logo">
+      <img src="esg_logo.png" alt="eSG Logo" onerror="this.src='https://via.placeholder.com/120x50?text=eSG+Logo'">
+      <div class="header-title">
+        <h1>RC-Snackbase eSG</h1>
+        <p>Schülergenossenschaft Raiffeisen-Campus eSG</p>
+      </div>
+    </div>
+    <div id="auth-status" class="hidden">
+      <span style="font-weight: 600; font-size: 0.85rem; color: var(--esg-navy);">
+        👤 <span id="logged-user-name"></span> (<span id="logged-user-class"></span>)
+      </span>
+      <button class="btn-secondary" style="margin-left: 12px; text-decoration: underline;" onclick="logout()">Abmelden</button>
     </div>
   </header>
 
-  <!-- FENSTER 1: WEBUNTIS LOGIN (HAUPTFENSTER BEIM START) -->
-  <div id="step-login" class="login-container">
-    <div class="card">
-      <h2 style="text-align: center;">Anmeldung mit WebUntis</h2>
-      <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
-        Melde dich mit deinen gewohnten WebUntis-Zugangsdaten vom Raiffeisen-Campus an.
-      </p>
+  <div class="container">
 
-      <form id="login-form" onsubmit="handleLogin(event)">
-        <div class="form-group">
-          <label for="untisUser">WebUntis Benutzername</label>
-          <input type="text" id="untisUser" placeholder="z. B. vorname.nachname" required>
-        </div>
-
-        <div class="form-group">
-          <label for="untisPass">WebUntis Passwort</label>
-          <input type="password" id="untisPass" placeholder="••••••••" required>
-        </div>
-
-        <div class="form-group">
-          <label for="untisClass">Deine Klasse / Stufe</label>
-          <input type="text" id="untisClass" placeholder="z. B. 9b oder MSS11" required>
-        </div>
-
-        <div id="login-error" class="error-msg hidden">Anmeldung fehlgeschlagen. Bitte prüfe deine Zugangsdaten.</div>
-
-        <button type="submit" class="btn-primary" style="margin-top: 12px;" id="login-btn">Anmelden & Weiter</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- FENSTER 2: PRODUKTAUSWAHL (NUR NACH AUTHENTIFIZIERUNG SICHTBAR) -->
-  <div id="step-selection" class="hidden">
-    
-    <div class="action-banner" id="action-section">
-      <h2>🔥 Aktuelle Aktionen</h2>
-      <div class="product-grid" id="action-grid"></div>
-    </div>
-
-    <div class="card">
-      <h2>Alle Produkte</h2>
-      <div class="product-grid" id="all-grid"></div>
-    </div>
-
-    <div class="sticky-bar">
-      <div class="total-info">
-        Gesamt: <span id="summary-price" style="color: var(--primary);">0,00 €</span>
-      </div>
-      <button class="btn-primary" style="width: auto; padding: 12px 24px;" onclick="goToCheckout()">Weiter zur Abholung 🔥</button>
-    </div>
-
-  </div>
-
-  <!-- FENSTER 3: CHECKOUT / KALENDER & PAUSENAUSWAHL -->
-  <div id="step-checkout" class="hidden">
-    <button class="btn-secondary" onclick="backToSelection()">← Zurück zur Auswahl</button>
-
-    <div class="card">
-      <h2>Bestellübersicht</h2>
-      <div id="checkout-summary-list"></div>
-      <hr style="border: 0; border-top: 1px dashed var(--border); margin: 12px 0;">
-      <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.1rem;">
-        <span>Gesamtsumme:</span>
-        <span id="checkout-total-price" style="color: var(--primary);">0,00 €</span>
+    <!-- FENSTER 1: LOGIN -->
+    <div id="step-login" class="login-box">
+      <div class="card">
+        <h2 style="text-align: center;">WebUntis Verifizierung</h2>
+        <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
+          Authentifizierung für Mitglieder & Schüler des Raiffeisen-Campus Dernbach.
+        </p>
+        <form id="login-form" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label for="untisUser">WebUntis Benutzername</label>
+            <input type="text" id="untisUser" placeholder="vorname.nachname" required>
+          </div>
+          <div class="form-group">
+            <label for="untisPass">Passwort</label>
+            <input type="password" id="untisPass" placeholder="••••••••" required>
+          </div>
+          <div class="form-group">
+            <label for="untisClass">Klasse / Stufe</label>
+            <input type="text" id="untisClass" placeholder="z. B. 9b oder MSS11" required>
+          </div>
+          <div id="login-error" style="color: #E53E3E; font-size: 0.85rem; margin-bottom: 10px;" class="hidden">
+            Anmeldung fehlgeschlagen. Bitte Zugangsdaten prüfen.
+          </div>
+          <button type="submit" class="btn-primary" style="width: 100%;" id="login-btn">Anmelden & eSG Shop betreten</button>
+        </form>
       </div>
     </div>
 
-    <div class="card">
-      <h2>Abholdatum & Pausenzeiten wählen</h2>
-      <form id="order-form" onsubmit="submitOrder(event)">
-        <div class="form-group">
-          <label>Name & Vorname (Verifiziert via WebUntis)</label>
-          <input type="text" id="studentName" readonly style="background: #E2E8F0; cursor: not-allowed;">
-        </div>
+    <!-- FENSTER 2: PRODUKTE & SHOPPING -->
+    <div id="step-selection" class="hidden">
 
-        <div class="form-group">
-          <label>Klasse / Stufe</label>
-          <input type="text" id="studentClass" readonly style="background: #E2E8F0; cursor: not-allowed;">
+      <!-- NEWS & WERBEBANNER -->
+      <div class="news-banner">
+        <div class="news-content">
+          <h3>📢 eSG News & Aktionen</h3>
+          <p>Willkommen im Click & Collect Shop der RC-Snackbase eSG! Bestelle deine Pausensnacks einfach vor und hole sie pünktlich ab. Achte auf unsere aktuellen Aktionsangebote!</p>
         </div>
-
-        <!-- KALENDER DROPDOWN -->
-        <div class="form-group">
-          <label for="pickupDate">Abholdatum wählen</label>
-          <input type="date" id="pickupDate" required onchange="updatePauseOptions()">
+        <div class="news-poster">
+          <img src="poster_aktion.png" alt="Aktionsplakat" onerror="this.src='https://via.placeholder.com/200x120?text=Aktionsplakat+eSG'">
         </div>
+      </div>
 
-        <!-- DYNAMISCHE PAUSENAUSWAHL BASIEREND AUF DEM STUNDENPLAN -->
-        <div class="form-group">
-          <label for="pickupPause">Abholpause / Verkaufsfenster</label>
-          <select id="pickupPause" required>
-            <option value="">Bitte zuerst Datum wählen...</option>
-          </select>
+      <!-- AKTIONEN GRID -->
+      <div class="card" id="action-section">
+        <h2>🔥 Aktuelle Aktionen</h2>
+        <div class="product-grid" id="action-grid"></div>
+      </div>
+
+      <!-- HAUPTSORTIMENT GRID -->
+      <div class="card">
+        <h2>Gesamtsortiment</h2>
+        <div class="product-grid" id="all-grid"></div>
+      </div>
+
+      <!-- EINKAUFSWAGEN BAR -->
+      <div class="cart-bar">
+        <div class="cart-info">
+          <div class="cart-total">Gesamt: <span id="summary-price">0,00 €</span></div>
+          <div class="cart-limit-hint">Mindestbestellwert: 1,00 € | Max: 21,50 €</div>
         </div>
+        <button class="btn-primary" id="checkout-btn" onclick="goToCheckout()">Einkaufswagen / Checkout 🛒</button>
+      </div>
 
-        <button type="submit" class="btn-primary" id="submit-btn">Kostenpflichtig bestellen & Kassenzettel herunterladen</button>
-      </form>
     </div>
+
+    <!-- FENSTER 3: CHECKOUT & ABHOLUNG -->
+    <div id="step-checkout" class="hidden">
+      <button class="btn-secondary" onclick="backToSelection()" style="margin-bottom: 16px;">← Zurück zum Sortiment</button>
+
+      <div class="card">
+        <h2>Einkaufswagen / Bestellübersicht</h2>
+        <div id="checkout-summary-list"></div>
+        <hr style="border: 0; border-top: 1px dashed var(--border); margin: 16px 0;">
+        <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 1.1rem; color: var(--esg-navy);">
+          <span>Gesamtsumme:</span>
+          <span id="checkout-total-price" style="color: var(--esg-orange);">0,00 €</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Abholdatum & Pausenzeiten wählen</h2>
+        <form id="order-form" onsubmit="submitOrder(event)">
+          <div class="form-group">
+            <label>Verifizierter Name</label>
+            <input type="text" id="studentName" readonly style="background: #E2E8F0;">
+          </div>
+          <div class="form-group">
+            <label>Klasse</label>
+            <input type="text" id="studentClass" readonly style="background: #E2E8F0;">
+          </div>
+          <div class="form-group">
+            <label for="pickupDate">Abholdatum</label>
+            <input type="date" id="pickupDate" required onchange="updatePauseOptions()">
+          </div>
+          <div class="form-group">
+            <label for="pickupPause">Verkaufsfenster</label>
+            <select id="pickupPause" required>
+              <option value="">Bitte zuerst Datum wählen...</option>
+            </select>
+          </div>
+          <button type="submit" class="btn-primary" style="width: 100%;" id="submit-btn">Kostenpflichtig bestellen & Kassenzettel herunterladen</button>
+        </form>
+      </div>
+    </div>
+
   </div>
 
-</div>
+  <!-- RECHTLICHER ANHANG / FOOTER -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-col">
+        <h4>RC-Snackbase eSG</h4>
+        <p>Schülergenossenschaft am Raiffeisen-Campus Gymnasium Dernbach.</p>
+        <p>Praktische Wirtschaftserziehung im Geiste Friedrich Wilhelm Raiffeisens.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Rechtliche Angaben</h4>
+        <p><strong>Vertretungsberechtigte Schüler:</strong> Vorstand der RC-Snackbase eSG</p>
+        <p><strong>Aufsichtsrat:</strong> Projektbetreuung Gymnasium Dernbach</p>
+        <p><strong>Sitz:</strong> Dernbach (Westerwald)</p>
+      </div>
+      <div class="footer-col">
+        <h4>Abhol- & Verkaufsbedingungen</h4>
+        <p>Bestellungen sind verbindlich. Die Ausgabe erfolgt strikt gegen Vorzeigen des digitalen Kassenzettels (PDF) am Verkaufspunkt.</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 RC-Snackbase eSG – Alle Rechte vorbehalten.
+    </div>
+  </footer>
 
-<script>
-  // Google Apps Script Web-App URL
-  const API_URL = "https://script.google.com/macros/s/AKfycbwwBaAQcwmMrbOtsyQ3O4LzFyA9GZ58Iy9WBqS773zPzEYOsWRXvHUUXoTTmkrZmj19bQ/exec";
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbwwBaAQcwmMrbOtsyQ3O4LzFyA9GZ58Iy9WBqS773zPzEYOsWRXvHUUXoTTmkrZmj19bQ/exec";
+    const UNTIS_SCHOOL = "raiffeisen-campus";
+    const UNTIS_SERVER = "raiffeisen-campus.webuntis.com";
 
-  // WebUntis Daten des Raiffeisen-Campus Dernbach
-  const UNTIS_SCHOOL = "raiffeisen-campus";
-  const UNTIS_SERVER = "raiffeisen-campus.webuntis.com";
+    const MIN_ORDER = 1.00;
+    const MAX_ORDER = 21.50;
 
-  let products = [];
-  let cartQuantities = {};
-  let currentUser = null; 
+    let products = [];
+    let cartQuantities = {};
+    let currentUser = null;
 
-  // Datumseingabe ab heute begrenzen
-  document.getElementById('pickupDate').min = new Date().toISOString().split('T')[0];
+    document.getElementById('pickupDate').min = new Date().toISOString().split('T')[0];
 
-  function requireAuth() {
-    if (!currentUser) {
-      alert("Aktion verweigert: Bitte melde dich zuerst über WebUntis an!");
-      showWindow('step-login');
-      return false;
+    function requireAuth() {
+      if (!currentUser) {
+        alert("Aktion verweigert: Bitte melde dich zuerst über WebUntis an!");
+        showWindow('step-login');
+        return false;
+      }
+      return true;
     }
-    return true;
-  }
 
-  function showWindow(windowId) {
-    document.getElementById('step-login').classList.add('hidden');
-    document.getElementById('step-selection').classList.add('hidden');
-    document.getElementById('step-checkout').classList.add('hidden');
+    function showWindow(windowId) {
+      document.getElementById('step-login').classList.add('hidden');
+      document.getElementById('step-selection').classList.add('hidden');
+      document.getElementById('step-checkout').classList.add('hidden');
+      document.getElementById(windowId).classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-    document.getElementById(windowId).classList.remove('hidden');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
+    async function handleLogin(e) {
+      e.preventDefault();
+      const btn = document.getElementById('login-btn');
+      const errEl = document.getElementById('login-error');
+      errEl.classList.add('hidden');
 
-  // LOGIN VIA WEBUNTIS
-  async function handleLogin(e) {
-    e.preventDefault();
-    const btn = document.getElementById('login-btn');
-    const errEl = document.getElementById('login-error');
-    errEl.classList.add('hidden');
+      const username = document.getElementById('untisUser').value.trim();
+      const password = document.getElementById('untisPass').value;
+      const userClass = document.getElementById('untisClass').value.trim();
 
-    const username = document.getElementById('untisUser').value.trim();
-    const password = document.getElementById('untisPass').value;
-    const userClass = document.getElementById('untisClass').value.trim();
+      btn.innerText = "Verifziere mit WebUntis...";
+      btn.disabled = true;
 
-    btn.innerText = "Verifiziere mit WebUntis...";
-    btn.disabled = true;
+      try {
+        const untisUrl = `https://${UNTIS_SERVER}/WebUntis/jsonrpc.do?school=${UNTIS_SCHOOL}`;
+        const payload = {
+          id: "rc_snackbar_auth",
+          method: "authenticate",
+          params: { user: username, password: password, client: "RC_Snackbar" },
+          jsonrpc: "2.0"
+        };
 
-    try {
-      const untisUrl = `https://${UNTIS_SERVER}/WebUntis/jsonrpc.do?school=${UNTIS_SCHOOL}`;
-      const payload = {
-        id: "rc_snackbar_auth",
-        method: "authenticate",
-        params: { user: username, password: password, client: "RC_Snackbar" },
-        jsonrpc: "2.0"
-      };
+        const res = await fetch(untisUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
 
-      const res = await fetch(untisUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+        const data = await res.json();
 
-      const data = await res.json();
-
-      if (data.result && data.result.sessionId) {
+        if (data.result && data.result.sessionId) {
+          currentUser = {
+            username: username,
+            name: username.replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+            userClass: userClass
+          };
+          setupUserSession();
+        } else {
+          errEl.classList.remove('hidden');
+        }
+      } catch (err) {
         currentUser = {
           username: username,
           name: username.replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase()),
-          userClass: userClass,
-          sessionId: data.result.sessionId
+          userClass: userClass
         };
-
-        document.getElementById('studentName').value = currentUser.name;
-        document.getElementById('studentClass').value = currentUser.userClass;
-        document.getElementById('logged-user-name').innerText = currentUser.name;
-        document.getElementById('logged-user-class').innerText = currentUser.userClass;
-        document.getElementById('auth-status').classList.remove('hidden');
-
-        await loadProducts();
-        showWindow('step-selection');
-      } else {
-        errEl.classList.remove('hidden');
+        setupUserSession();
+      } finally {
+        btn.innerText = "Anmelden & eSG Shop betreten";
+        btn.disabled = false;
       }
-    } catch (err) {
-      // Fallback für Testzwecke
-      currentUser = {
-        username: username,
-        name: username.replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase()),
-        userClass: userClass
-      };
+    }
 
+    function setupUserSession() {
       document.getElementById('studentName').value = currentUser.name;
       document.getElementById('studentClass').value = currentUser.userClass;
       document.getElementById('logged-user-name').innerText = currentUser.name;
       document.getElementById('logged-user-class').innerText = currentUser.userClass;
       document.getElementById('auth-status').classList.remove('hidden');
 
-      await loadProducts();
+      loadProducts();
       showWindow('step-selection');
-    } finally {
-      btn.innerText = "Anmelden & Weiter";
-      btn.disabled = false;
-    }
-  }
-
-  function logout() {
-    currentUser = null;
-    document.getElementById('auth-status').classList.add('hidden');
-    document.getElementById('login-form').reset();
-    showWindow('step-login');
-  }
-
-  // EXAKTE PAUSENAUSWAHL ANHAND DES STUNDENPLANS DER KLASSE 9B
-  function updatePauseOptions() {
-    const dateInput = document.getElementById('pickupDate').value;
-    const pauseSelect = document.getElementById('pickupPause');
-    pauseSelect.innerHTML = '';
-
-    if (!dateInput) return;
-
-    const selectedDate = new Date(dateInput);
-    const dayOfWeek = selectedDate.getDay(); // 0 = So, 1 = Mo, 2 = Di, 3 = Mi, 4 = Do, 5 = Fr, 6 = Sa
-
-    let options = [];
-
-    if (dayOfWeek === 1) { // MONTAG (Wirtschaft in der 6. Std.)
-      options = [
-        "1. Pause (09:10 - 09:25 Uhr)",
-        "2. Pause (10:25 - 10:40 Uhr)",
-        "Mittagspause / Vor 6. Std. Wirtschaft (13:30 - 13:45 Uhr)",
-        "6. Pause (Nach 6. Std. Wirtschaft / 15:00 Uhr)"
-      ];
-    } else if (dayOfWeek === 3 || dayOfWeek === 4) { // MITTWOCH & DONNERSTAG (Wirtschaft in der 3. Std.)
-      options = [
-        "1. Pause (09:10 - 09:25 Uhr)",
-        "2. Pause / Vor 3. Std. Wirtschaft (10:25 - 10:40 Uhr)",
-        "Mittagspause (13:30 - 13:45 Uhr)"
-      ];
-    } else if (dayOfWeek === 2) { // DIENSTAG
-      options = [
-        "1. Pause (09:10 - 09:25 Uhr)",
-        "2. Pause (10:25 - 10:40 Uhr)",
-        "Mittagspause (13:30 - 13:45 Uhr)"
-      ];
-    } else if (dayOfWeek === 5) { // FREITAG (Keine Mittagspause, keine 6. Pause)
-      options = [
-        "1. Pause (09:10 - 09:25 Uhr)",
-        "2. Pause (10:25 - 10:40 Uhr)"
-      ];
-    } else { // WOCHENENDE
-      const el = document.createElement('option');
-      el.value = "";
-      el.innerText = "Am Wochenende findet kein Verkauf statt!";
-      pauseSelect.appendChild(el);
-      return;
     }
 
-    options.forEach(opt => {
-      const el = document.createElement('option');
-      el.value = opt;
-      el.innerText = opt;
-      pauseSelect.appendChild(el);
-    });
-  }
-
-  async function loadProducts() {
-    try {
-      const res = await fetch(API_URL);
-      products = await res.json();
-      renderGrids();
-    } catch (e) {
-      alert("Fehler beim Laden der Produkte.");
+    function logout() {
+      currentUser = null;
+      document.getElementById('auth-status').classList.add('hidden');
+      document.getElementById('login-form').reset();
+      showWindow('step-login');
     }
-  }
 
-  function renderGrids() {
-    const actionGrid = document.getElementById('action-grid');
-    const allGrid = document.getElementById('all-grid');
-    actionGrid.innerHTML = '';
-    allGrid.innerHTML = '';
+    function updatePauseOptions() {
+      const dateInput = document.getElementById('pickupDate').value;
+      const pauseSelect = document.getElementById('pickupPause');
+      pauseSelect.innerHTML = '';
 
-    let hasActions = false;
+      if (!dateInput) return;
 
-    products.forEach((p, idx) => {
-      cartQuantities[idx] = cartQuantities[idx] || 0;
-      const cardHtml = createProductCard(p, idx);
+      const selectedDate = new Date(dateInput);
+      const dayOfWeek = selectedDate.getDay();
 
-      if (p.isAction) {
-        actionGrid.appendChild(cardHtml);
-        hasActions = true;
+      let options = [];
+
+      if (dayOfWeek === 1) { // MONTAG
+        options = [
+          "1. Pause (09:10 - 09:25 Uhr)",
+          "2. Pause (10:25 - 10:40 Uhr)",
+          "Mittagspause / Vor 6. Std. Wirtschaft (13:30 - 13:45 Uhr)",
+          "6. Pause (Nach 6. Std. Wirtschaft / 15:00 Uhr)"
+        ];
+      } else if (dayOfWeek === 3 || dayOfWeek === 4) { // MITTWOCH & DONNERSTAG
+        options = [
+          "1. Pause (09:10 - 09:25 Uhr)",
+          "2. Pause / Vor 3. Std. Wirtschaft (10:25 - 10:40 Uhr)",
+          "Mittagspause (13:30 - 13:45 Uhr)"
+        ];
+      } else if (dayOfWeek === 2) { // DIENSTAG
+        options = [
+          "1. Pause (09:10 - 09:25 Uhr)",
+          "2. Pause (10:25 - 10:40 Uhr)",
+          "Mittagspause (13:30 - 13:45 Uhr)"
+        ];
+      } else if (dayOfWeek === 5) { // FREITAG
+        options = [
+          "1. Pause (09:10 - 09:25 Uhr)",
+          "2. Pause (10:25 - 10:40 Uhr)"
+        ];
       } else {
-        allGrid.appendChild(cardHtml);
+        const el = document.createElement('option');
+        el.value = "";
+        el.innerText = "Am Wochenende findet kein Verkauf statt!";
+        pauseSelect.appendChild(el);
+        return;
       }
-    });
 
-    if (!hasActions) {
-      document.getElementById('action-section').style.display = 'none';
-    }
-  }
-
-  function createProductCard(p, idx) {
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    card.innerHTML = `
-      ${p.isAction ? '<span class="product-badge">Aktion</span>' : ''}
-      <div class="product-img-wrap">
-        <img src="${p.image}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/150?text=Kein+Bild'">
-      </div>
-      <div class="product-title">${p.name}</div>
-      <div class="product-price">${Number(p.price).toFixed(2).replace('.', ',')} €</div>
-      <div class="qty-controls">
-        <button class="qty-btn" onclick="updateQty(${idx}, -1)">-</button>
-        <span class="qty-display" id="qty-${idx}">${cartQuantities[idx]}</span>
-        <button class="qty-btn" onclick="updateQty(${idx}, 1)">+</button>
-      </div>
-    `;
-    return card;
-  }
-
-  function updateQty(idx, change) {
-    if (!requireAuth()) return;
-
-    const current = cartQuantities[idx] || 0;
-    const next = Math.max(0, current + change);
-    cartQuantities[idx] = next;
-
-    document.getElementById(`qty-${idx}`).innerText = next;
-    calculateTotal();
-  }
-
-  function calculateTotal() {
-    let total = 0;
-    products.forEach((p, idx) => {
-      const qty = cartQuantities[idx] || 0;
-      total += qty * Number(p.price);
-    });
-
-    const formatted = total.toFixed(2).replace('.', ',') + " €";
-    document.getElementById('summary-price').innerText = formatted;
-    document.getElementById('checkout-total-price').innerText = formatted;
-    return total;
-  }
-
-  function goToCheckout() {
-    if (!requireAuth()) return;
-
-    const total = calculateTotal();
-    if (total === 0) {
-      alert("Bitte wähle mindestens ein Produkt aus!");
-      return;
+      options.forEach(opt => {
+        const el = document.createElement('option');
+        el.value = opt;
+        el.innerText = opt;
+        pauseSelect.appendChild(el);
+      });
     }
 
-    const summaryList = document.getElementById('checkout-summary-list');
-    summaryList.innerHTML = '';
-
-    products.forEach((p, idx) => {
-      const qty = cartQuantities[idx];
-      if (qty > 0) {
-        const itemRow = document.createElement('div');
-        itemRow.style.cssText = "display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.95rem;";
-        itemRow.innerHTML = `
-          <span>${qty}x ${p.name}</span>
-          <span>${(qty * Number(p.price)).toFixed(2).replace('.', ',')} €</span>
-        `;
-        summaryList.appendChild(itemRow);
+    async function loadProducts() {
+      try {
+        const res = await fetch(API_URL);
+        products = await res.json();
+        renderGrids();
+      } catch (e) {
+        alert("Fehler beim Laden der Produkte.");
       }
-    });
+    }
 
-    showWindow('step-checkout');
-  }
+    function renderGrids() {
+      const actionGrid = document.getElementById('action-grid');
+      const allGrid = document.getElementById('all-grid');
+      actionGrid.innerHTML = '';
+      allGrid.innerHTML = '';
 
-  function backToSelection() {
-    if (!requireAuth()) return;
-    showWindow('step-selection');
-  }
+      let hasActions = false;
 
-  // AUTOMATISCHER PDF-KASSENZETTEL DOWNLOAD
-  function generateReceiptPDF(orderData) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({
-      unit: 'mm',
-      format: [80, 160] // Kassenzettel-Format
-    });
+      products.forEach((p, idx) => {
+        cartQuantities[idx] = cartQuantities[idx] || 0;
+        const cardHtml = createProductCard(p, idx);
 
-    const orderId = "RC-" + Math.floor(100000 + Math.random() * 900000);
-    const now = new Date().toLocaleString('de-DE');
-
-    // Header
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(13);
-    doc.text("RC SNACKBAR", 40, 12, { align: "center" });
-
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "normal");
-    doc.text("Raiffeisen-Campus Dernbach eSG", 40, 16, { align: "center" });
-    doc.text("--------------------------------------------------", 40, 20, { align: "center" });
-
-    // Kundendaten
-    doc.setFontSize(8);
-    doc.text(`Bestell-Nr: ${orderId}`, 6, 25);
-    doc.text(`Datum: ${now}`, 6, 29);
-    doc.text(`Kunde: ${orderData.studentName}`, 6, 33);
-    doc.text(`Klasse: ${orderData.studentClass}`, 6, 37);
-    doc.text(`Abholdatum: ${orderData.pickupDate}`, 6, 41);
-    doc.text(`Verkaufsfenster:`, 6, 45);
-    doc.setFont("helvetica", "bold");
-    doc.text(`${orderData.pickupPause}`, 6, 49);
-    doc.setFont("helvetica", "normal");
-    doc.text("--------------------------------------------------", 40, 53, { align: "center" });
-
-    // Artikelaufstellung
-    let yPos = 58;
-    doc.setFont("helvetica", "bold");
-    doc.text("Artikel", 6, yPos);
-    doc.text("Summe", 74, yPos, { align: "right" });
-    yPos += 4;
-    doc.setFont("helvetica", "normal");
-
-    orderData.items.forEach(item => {
-      doc.text(`1x ${item}`, 6, yPos);
-      yPos += 4;
-    });
-
-    doc.text("--------------------------------------------------", 40, yPos, { align: "center" });
-    yPos += 5;
-
-    // Gesamtsumme
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.text("GESAMT:", 6, yPos);
-    doc.text(`${orderData.totalPrice} €`, 74, yPos, { align: "right" });
-
-    yPos += 8;
-    doc.setFontSize(7);
-    doc.setFont("helvetica", "italic");
-    doc.text("Vielen Dank für deine Vorbestellung!", 40, yPos, { align: "center" });
-    yPos += 4;
-    doc.text("Bitte zeige diesen Bon bei der Abholung vor.", 40, yPos, { align: "center" });
-
-    // PDF speichern
-    doc.save(`Kassenzettel_${orderData.studentName.replace(/\s+/g, '_')}_${orderId}.pdf`);
-  }
-
-  // BESTELLUNG ABSENDEN
-  async function submitOrder(e) {
-    e.preventDefault();
-
-    if (!requireAuth()) return;
-
-    const selectedItems = [];
-    products.forEach((p, idx) => {
-      const qty = cartQuantities[idx];
-      for (let i = 0; i < qty; i++) {
-        selectedItems.push(p.name);
-      }
-    });
-
-    const pickupDate = document.getElementById('pickupDate').value;
-    const pickupPause = document.getElementById('pickupPause').value;
-
-    const payload = {
-      studentName: currentUser.name,
-      studentClass: currentUser.userClass,
-      pickupDate: pickupDate,
-      pickupPause: pickupPause,
-      items: selectedItems,
-      totalPrice: calculateTotal().toFixed(2).replace('.', ',')
-    };
-
-    const submitBtn = document.getElementById('submit-btn');
-    submitBtn.disabled = true;
-    submitBtn.innerText = "Bestellung wird übermittelt...";
-
-    try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify(payload)
+        if (p.isAction) {
+          actionGrid.appendChild(cardHtml);
+          hasActions = true;
+        } else {
+          allGrid.appendChild(cardHtml);
+        }
       });
 
-      const result = await res.json();
-      if (result.status === "success") {
-        // PDF-Kassenzettel erzeugen
-        generateReceiptPDF(payload);
-
-        alert("Bestellung erfolgreich aufgegeben! Dein Kassenzettel-PDF wurde automatisch heruntergeladen.");
-        cartQuantities = {};
-        renderGrids();
-        calculateTotal();
-        document.getElementById('order-form').reset();
-        showWindow('step-selection');
-      } else {
-        alert("Fehler bei der Bestellung. Bitte versuche es erneut.");
+      if (!hasActions) {
+        document.getElementById('action-section').style.display = 'none';
       }
-    } catch (err) {
-      alert("Netzwerkfehler beim Absenden der Bestellung.");
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.innerText = "Kostenpflichtig bestellen & Kassenzettel herunterladen";
     }
-  }
-</script>
 
+    function createProductCard(p, idx) {
+      const card = document.createElement('div');
+      const isSoldOut = p.stock !== undefined && Number(p.stock) <= 0;
+
+      card.className = `product-card ${isSoldOut ? 'sold-out' : ''}`;
+      
+      let badgeHtml = '';
+      if (isSoldOut) {
+        badgeHtml = '<span class="badge badge-out">Ausverkauft</span>';
+      } else if (p.isAction) {
+        badgeHtml = '<span class="badge badge-action">Aktion</span>';
+      }
+
+      card.innerHTML = `
+        ${badgeHtml}
+        <div class="product-img-wrap">
+          <img src="${p.image}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/150?text=Kein+Bild'">
+        </div>
+        <div class="product-title">${p.name}</div>
+        <div class="product-price">${Number(p.price).toFixed(2).replace('.', ',')} €</div>
+        <div class="qty-controls">
+          <button class="qty-btn" onclick="updateQty(${idx}, -1)" ${isSoldOut ? 'disabled' : ''}>-</button>
+          <span class="qty-display" id="qty-${idx}">${cartQuantities[idx]}</span>
+          <button class="qty-btn" onclick="updateQty(${idx}, 1)" ${isSoldOut ? 'disabled' : ''}>+</button>
+        </div>
+      `;
+      return card;
+    }
+
+    function updateQty(idx, change) {
+      if (!requireAuth()) return;
+
+      const p = products[idx];
+      const current = cartQuantities[idx] || 0;
+      const maxStock = p.stock !== undefined ? Number(p.stock) : 99;
+
+      let next = current + change;
+      if (next > maxStock) {
+        alert(`Leider sind nur noch ${maxStock} Stück verfügbar!`);
+        next = maxStock;
+      }
+      next = Math.max(0, next);
+
+      cartQuantities[idx] = next;
+      document.getElementById(`qty-${idx}`).innerText = next;
+      calculateTotal();
+    }
+
+    function calculateTotal() {
+      let total = 0;
+      products.forEach((p, idx) => {
+        const qty = cartQuantities[idx] || 0;
+        total += qty * Number(p.price);
+      });
+
+      const formatted = total.toFixed(2).replace('.', ',') + " €";
+      document.getElementById('summary-price').innerText = formatted;
+      document.getElementById('checkout-total-price').innerText = formatted;
+      return total;
+    }
+
+    function goToCheckout() {
+      if (!requireAuth()) return;
+
+      const total = calculateTotal();
+
+      if (total < MIN_ORDER) {
+        alert(`Der Mindestbestellwert beträgt ${MIN_ORDER.toFixed(2).replace('.', ',')} €!`);
+        return;
+      }
+
+      if (total > MAX_ORDER) {
+        alert(`Der Maximalbestellwert von ${MAX_ORDER.toFixed(2).replace('.', ',')} € wurde überschritten!`);
+        return;
+      }
+
+      const summaryList = document.getElementById('checkout-summary-list');
+      summaryList.innerHTML = '';
+
+      products.forEach((p, idx) => {
+        const qty = cartQuantities[idx];
+        if (qty > 0) {
+          const itemRow = document.createElement('div');
+          itemRow.style.cssText = "display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95rem;";
+          itemRow.innerHTML = `
+            <span><strong>${qty}x</strong> ${p.name}</span>
+            <span>${(qty * Number(p.price)).toFixed(2).replace('.', ',')} €</span>
+          `;
+          summaryList.appendChild(itemRow);
+        }
+      });
+
+      showWindow('step-checkout');
+    }
+
+    function backToSelection() {
+      if (!requireAuth()) return;
+      showWindow('step-selection');
+    }
+
+    function generateReceiptPDF(orderData) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({
+        unit: 'mm',
+        format: [80, 160]
+      });
+
+      const orderId = "RC-" + Math.floor(100000 + Math.random() * 900000);
+      const now = new Date().toLocaleString('de-DE');
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(13);
+      doc.text("RC-SNACKBASE eSG", 40, 12, { align: "center" });
+
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "normal");
+      doc.text("Raiffeisen-Campus Dernbach eSG", 40, 16, { align: "center" });
+      doc.text("--------------------------------------------------", 40, 20, { align: "center" });
+
+      doc.setFontSize(8);
+      doc.text(`Bestell-Nr: ${orderId}`, 6, 25);
+      doc.text(`Datum: ${now}`, 6, 29);
+      doc.text(`Kunde: ${orderData.studentName}`, 6, 33);
+      doc.text(`Klasse: ${orderData.studentClass}`, 6, 37);
+      doc.text(`Abholdatum: ${orderData.pickupDate}`, 6, 41);
+      doc.text(`Verkaufsfenster:`, 6, 45);
+      doc.setFont("helvetica", "bold");
+      doc.text(`${orderData.pickupPause}`, 6, 49);
+      doc.setFont("helvetica", "normal");
+      doc.text("--------------------------------------------------", 40, 53, { align: "center" });
+
+      let yPos = 58;
+      doc.setFont("helvetica", "bold");
+      doc.text("Artikel", 6, yPos);
+      doc.text("Summe", 74, yPos, { align: "right" });
+      yPos += 4;
+      doc.setFont("helvetica", "normal");
+
+      orderData.items.forEach(item => {
+        doc.text(`1x ${item}`, 6, yPos);
+        yPos += 4;
+      });
+
+      doc.text("--------------------------------------------------", 40, yPos, { align: "center" });
+      yPos += 5;
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text("GESAMT:", 6, yPos);
+      doc.text(`${orderData.totalPrice} €`, 74, yPos, { align: "right" });
+
+      yPos += 8;
+      doc.setFontSize(7);
+      doc.setFont("helvetica", "italic");
+      doc.text("Vielen Dank fuer deinen Einkauf bei der eSG!", 40, yPos, { align: "center" });
+      yPos += 4;
+      doc.text("Bitte zeige diesen Bon bei der Abholung vor.", 40, yPos, { align: "center" });
+
+      doc.save(`Kassenzettel_${orderData.studentName.replace(/\s+/g, '_')}_${orderId}.pdf`);
+    }
+
+    async function submitOrder(e) {
+      e.preventDefault();
+
+      if (!requireAuth()) return;
+
+      const selectedItems = [];
+      products.forEach((p, idx) => {
+        const qty = cartQuantities[idx];
+        for (let i = 0; i < qty; i++) {
+          selectedItems.push(p.name);
+        }
+      });
+
+      const pickupDate = document.getElementById('pickupDate').value;
+      const pickupPause = document.getElementById('pickupPause').value;
+
+      const payload = {
+        studentName: currentUser.name,
+        studentClass: currentUser.userClass,
+        pickupDate: pickupDate,
+        pickupPause: pickupPause,
+        items: selectedItems,
+        totalPrice: calculateTotal().toFixed(2).replace('.', ',')
+      };
+
+      const submitBtn = document.getElementById('submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Bestellung wird übermittelt...";
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+
+        const result = await res.json();
+        if (result.status === "success") {
+          generateReceiptPDF(payload);
+          alert("Bestellung erfolgreich aufgegeben! Dein Kassenzettel-PDF wurde heruntergeladen.");
+          cartQuantities = {};
+          renderGrids();
+          calculateTotal();
+          document.getElementById('order-form').reset();
+          showWindow('step-selection');
+        } else {
+          alert("Fehler bei der Bestellung. Bitte versuche es erneut.");
+        }
+      } catch (err) {
+        alert("Netzwerkfehler beim Absenden der Bestellung.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Kostenpflichtig bestellen & Kassenzettel herunterladen";
+      }
+    }
+  </script>
 </body>
 </html>

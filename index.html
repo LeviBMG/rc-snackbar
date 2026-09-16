@@ -101,7 +101,6 @@
       padding-bottom: 8px;
     }
 
-    /* NEWS & WERBEBANNER SECTION */
     .news-banner {
       display: grid;
       grid-template-columns: 2fr 1fr;
@@ -146,7 +145,6 @@
       border-radius: 4px;
     }
 
-    /* PRODUKT GRID */
     .product-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -289,7 +287,6 @@
 
     .hidden { display: none !important; }
 
-    /* EINKAUFSWAGEN BOTTOM-BAR */
     .cart-bar {
       position: sticky;
       bottom: 16px;
@@ -307,7 +304,6 @@
     .cart-total { font-size: 1.2rem; font-weight: 800; color: var(--esg-orange); }
     .cart-limit-hint { font-size: 0.75rem; color: #94A3B8; }
 
-    /* DEZENTE FUSSZEILE */
     footer {
       background: var(--card-bg);
       border-top: 1px solid var(--border);
@@ -340,7 +336,6 @@
       background: var(--esg-light-grey);
     }
 
-    /* MODAL FÜR AGBs */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -415,10 +410,28 @@
             <label for="untisPass">Passwort</label>
             <input type="password" id="untisPass" placeholder="••••••••" required>
           </div>
+          
+          <!-- DROPDOWN FÜR KLASSEN 5a-9b UND MSS 1-3 -->
           <div class="form-group">
             <label for="untisClass">Klasse / Stufe</label>
-            <input type="text" id="untisClass" placeholder="z. B. 9b oder MSS11" required>
+            <select id="untisClass" required>
+              <option value="">Bitte Klasse wählen...</option>
+              <option value="5a">5a</option>
+              <option value="5b">5b</option>
+              <option value="6a">6a</option>
+              <option value="6b">6b</option>
+              <option value="7a">7a</option>
+              <option value="7b">7b</option>
+              <option value="8a">8a</option>
+              <option value="8b">8b</option>
+              <option value="9a">9a</option>
+              <option value="9b">9b</option>
+              <option value="MSS 1">MSS 1</option>
+              <option value="MSS 2">MSS 2</option>
+              <option value="MSS 3">MSS 3</option>
+            </select>
           </div>
+
           <div id="login-error" style="color: #E53E3E; font-size: 0.85rem; margin-bottom: 10px;" class="hidden">
             Anmeldung fehlgeschlagen. Bitte Zugangsdaten prüfen.
           </div>
@@ -430,7 +443,6 @@
     <!-- FENSTER 2: PRODUKTE & SHOPPING -->
     <div id="step-selection" class="hidden">
 
-      <!-- NEWS & WERBEBANNER -->
       <div class="news-banner">
         <div class="news-content">
           <h3>📢 eSG News & Aktionen</h3>
@@ -441,19 +453,16 @@
         </div>
       </div>
 
-      <!-- AKTIONEN GRID -->
       <div class="card" id="action-section">
         <h2>🔥 Aktuelle Aktionen</h2>
         <div class="product-grid" id="action-grid"></div>
       </div>
 
-      <!-- HAUPTSORTIMENT GRID -->
       <div class="card">
         <h2>Gesamtsortiment</h2>
         <div class="product-grid" id="all-grid"></div>
       </div>
 
-      <!-- EINKAUFSWAGEN BAR -->
       <div class="cart-bar">
         <div class="cart-info">
           <div class="cart-total">Gesamt: <span id="summary-price">0,00 €</span></div>
@@ -523,7 +532,7 @@
   </footer>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbyqwTBYQDpiQIHbvsYxjjqbHupH0kH5_V6WT9JxPoeY3HGhV6kXLTnFati5nZxmAHgZOQ/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbwSueeJxw8ul68StJZ84vmjTHdP4d70Kw6QQ1YnkdMnbbrYys3np6bzYWktWnFVUYQaVg/exec";
     const UNTIS_SCHOOL = "raiffeisen-campus";
     const UNTIS_SERVER = "raiffeisen-campus.webuntis.com";
 
@@ -534,9 +543,13 @@
     let cartQuantities = {};
     let currentUser = null;
 
-    document.getElementById('pickupDate').min = new Date().toISOString().split('T')[0];
+    document.addEventListener("DOMContentLoaded", () => {
+      const dateEl = document.getElementById('pickupDate');
+      if (dateEl) {
+        dateEl.min = new Date().toISOString().split('T')[0];
+      }
+    });
 
-    // SICHERS PARSEN VON PREISEN (HANDHABT "1,50", "1.50 €", UND ABSENT/UNDEFINED)
     function parsePrice(val) {
       if (val === undefined || val === null) return 0;
       if (typeof val === 'number') return isNaN(val) ? 0 : val;
@@ -546,7 +559,10 @@
     }
 
     function toggleAgbModal(show) {
-      document.getElementById('agb-modal').classList.toggle('hidden', !show);
+      const modal = document.getElementById('agb-modal');
+      if (modal) {
+        modal.classList.toggle('hidden', !show);
+      }
     }
 
     function requireAuth() {
@@ -559,10 +575,18 @@
     }
 
     function showWindow(windowId) {
-      document.getElementById('step-login').classList.add('hidden');
-      document.getElementById('step-selection').classList.add('hidden');
-      document.getElementById('step-checkout').classList.add('hidden');
-      document.getElementById(windowId).classList.remove('hidden');
+      const stepLogin = document.getElementById('step-login');
+      const stepSelection = document.getElementById('step-selection');
+      const stepCheckout = document.getElementById('step-checkout');
+
+      if (stepLogin) stepLogin.classList.add('hidden');
+      if (stepSelection) stepSelection.classList.add('hidden');
+      if (stepCheckout) stepCheckout.classList.add('hidden');
+      
+      const target = document.getElementById(windowId);
+      if (target) {
+        target.classList.remove('hidden');
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -570,11 +594,16 @@
       e.preventDefault();
       const btn = document.getElementById('login-btn');
       const errEl = document.getElementById('login-error');
-      errEl.classList.add('hidden');
+      if (errEl) errEl.classList.add('hidden');
 
       const username = document.getElementById('untisUser').value.trim();
       const password = document.getElementById('untisPass').value;
-      const userClass = document.getElementById('untisClass').value.trim();
+      const userClass = document.getElementById('untisClass').value;
+
+      if (!username || !password || !userClass) {
+        alert("Bitte fülle alle Felder aus!");
+        return;
+      }
 
       btn.innerText = "Verifiziere mit WebUntis...";
       btn.disabled = true;
@@ -604,7 +633,7 @@
           };
           setupUserSession();
         } else {
-          errEl.classList.remove('hidden');
+          if (errEl) errEl.classList.remove('hidden');
         }
       } catch (err) {
         currentUser = {
@@ -656,12 +685,11 @@
           "Mittagspause",
           "6. Pause (Letzte Pause)"
         ];
-      } else if (dayOfWeek === 2 || dayOfWeek === 3 || dayOfWeek === 4) { // DIENSTAG, MITTWOCH, DONNERSTAG
+      } else if (dayOfWeek >= 2 && dayOfWeek <= 4) { // DIENSTAG, MITTWOCH, DONNERSTAG
         options = [
           "1. Pause",
           "2. Pause",
           "Mittagspause"
-          "6. Pause (Letzte Pause)"
         ];
       } else if (dayOfWeek === 5) { // FREITAG
         options = [
@@ -690,13 +718,15 @@
         products = await res.json();
         renderGrids();
       } catch (e) {
-        alert("Fehler beim Laden der Produkte.");
+        console.error("Fehler beim Laden der Produkte:", e);
       }
     }
 
     function renderGrids() {
       const actionGrid = document.getElementById('action-grid');
       const allGrid = document.getElementById('all-grid');
+      if (!actionGrid || !allGrid) return;
+
       actionGrid.innerHTML = '';
       allGrid.innerHTML = '';
 
@@ -714,10 +744,9 @@
         }
       });
 
-      if (!hasActions) {
-        document.getElementById('action-section').style.display = 'none';
-      } else {
-        document.getElementById('action-section').style.display = 'block';
+      const actionSection = document.getElementById('action-section');
+      if (actionSection) {
+        actionSection.style.display = hasActions ? 'block' : 'none';
       }
     }
 
@@ -771,7 +800,8 @@
       next = Math.max(0, next);
 
       cartQuantities[idx] = next;
-      document.getElementById(`qty-${idx}`).innerText = next;
+      const qtyEl = document.getElementById(`qty-${idx}`);
+      if (qtyEl) qtyEl.innerText = next;
       calculateTotal();
     }
 
@@ -784,8 +814,11 @@
       });
 
       const formatted = total.toFixed(2).replace('.', ',') + " €";
-      document.getElementById('summary-price').innerText = formatted;
-      document.getElementById('checkout-total-price').innerText = formatted;
+      const summaryEl = document.getElementById('summary-price');
+      const checkoutTotalEl = document.getElementById('checkout-total-price');
+      
+      if (summaryEl) summaryEl.innerText = formatted;
+      if (checkoutTotalEl) checkoutTotalEl.innerText = formatted;
       return total;
     }
 
@@ -805,22 +838,23 @@
       }
 
       const summaryList = document.getElementById('checkout-summary-list');
-      summaryList.innerHTML = '';
-
-      products.forEach((p, idx) => {
-        const qty = cartQuantities[idx];
-        if (qty > 0) {
-          const priceVal = parsePrice(p.price || p.preis || p.Preis);
-          const nameVal = p.name || p.Name || p.titel || "Produkt";
-          const itemRow = document.createElement('div');
-          itemRow.style.cssText = "display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95rem;";
-          itemRow.innerHTML = `
-            <span><strong>${qty}x</strong> ${nameVal}</span>
-            <span>${(qty * priceVal).toFixed(2).replace('.', ',')} €</span>
-          `;
-          summaryList.appendChild(itemRow);
-        }
-      });
+      if (summaryList) {
+        summaryList.innerHTML = '';
+        products.forEach((p, idx) => {
+          const qty = cartQuantities[idx];
+          if (qty > 0) {
+            const priceVal = parsePrice(p.price || p.preis || p.Preis);
+            const nameVal = p.name || p.Name || p.titel || "Produkt";
+            const itemRow = document.createElement('div');
+            itemRow.style.cssText = "display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95rem;";
+            itemRow.innerHTML = `
+              <span><strong>${qty}x</strong> ${nameVal}</span>
+              <span>${(qty * priceVal).toFixed(2).replace('.', ',')} €</span>
+            `;
+            summaryList.appendChild(itemRow);
+          }
+        });
+      }
 
       showWindow('step-checkout');
     }

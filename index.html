@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RC Snackbar - Click & Collect</title>
+  <style>
+    :root {
+      --primary: #004b87;
+      --accent: #e30613;
+      --bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text: #212529;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+      border-bottom: 3px solid var(--primary);
+      padding-bottom: 12px;
+    }
+    h1 {
+      color: var(--primary);
+      margin: 0 0 6px 0;
+    }
+    .product-card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 4px solid var(--primary);
+    }
+    .product-card.action {
+      border-left-color: var(--accent);
+    }
+    .badge-action {
+      background: var(--accent);
+      color: white;
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 6px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+    .form-group {
+      margin-bottom: 14px;
+    }
+    label {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    .cart-summary {
+      background: #eef4f8;
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 16px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>RC Snackbar eSG</h1>
+      <p>Vorbestellen & direkt in der Pause abholen</p>
+    </header>
+
+    <div id="products-list">Produkte werden geladen...</div>
+
+    <form id="order-form" style="margin-top: 24px;">
+      <div class="form-group">
+        <label for="name">Vor- und Nachname</label>
+        <input type="text" id="name" required placeholder="z. B. Max Mustermann">
+      </div>
+      <div class="form-group">
+        <label for="class">Klasse / Stufe</label>
+        <input type="text" id="class" required placeholder="z. B. 9a">
+      </div>
+      <div class="form-group">
+        <label for="pause">Abholpause</label>
+        <select id="pause" required>
+          <option value="">Bitte wählen...</option>
+          <option value="1. Pause">1. Pause</option>
+          <option value="2. Pause">2. Pause</option>
+        </select>
+      </div>
+
+      <div class="cart-summary">
+        Gesamtsumme: <span id="total-price">0.00</span> € (Zahlung bei Abholung)
+      </div>
+
+      <button type="submit" id="submit-btn" style="margin-top: 16px;">Verbindlich vorbestellen</button>
+    </form>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4QFt2aQENa47IGJilYgDfZI9JBO1-QT7yQ32OJ7UU7g7-adsvOJ0fyb3yqMBPPQjCSA/exec";
+    let cart = {};
+    let productsData = [];
+
+    async function loadProducts() {
+      try {
+        const res = await fetch(SCRIPT_URL);
+        productsData = await res.json();
+        renderProducts();
+      } catch (e) {
+        document.getElementById('products-list').innerText = 'Fehler beim Laden der Produkte.';
+      }
+    }
+
+    function renderProducts() {
+      const list = document.getElementById('products-list');
+      list.innerHTML = '';
+      productsData.forEach(p => {
+        const card = document.createElement('div');
+        card.className = `product-card ${p.isAction ? 'action' : ''}`;
+        card.innerHTML = `
+          <div>
+            <strong>${p.name}</strong> ${p.isAction ? '<span class="badge-action">Aktion</span>' : ''}<br>
+            <small>${parseFloat(p.price).toFixed(2)} €</small>
+          </div>
+          <div>
+            <input type="number" min="0" max="5" value="0" style="width: 60px;" onchange="updateCart('${p.name}', ${p.price}, this.value)">
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    function updateCart(name, price, qty) {
+      qty = parseInt(qty);
+      if (qty > 0) {
+        cart[name] = { price: price, qty: qty };
+      } else {
+        delete cart[name];
+      }
+      calculateTotal();
+    }
+
+    function calculateTotal() {
+      let total = 0;
+      for (let item in cart) {
+        total += cart[item].price * cart[item].qty;
+      }
+      document.getElementById('total-price').innerText = total.toFixed(2);
+    }
+
+    document.getElementById('order-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const itemsList = Object.keys(cart).map(k => `${cart[k].qty}x ${k}`);
+      if (itemsList.length === 0) {
+        alert("Bitte wähle mindestens einen Artikel aus.");
+        return;
+      }
+
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.innerText = "Wird gesendet...";
+
+      const payload = {
+        studentName: document.getElementById('name').value,
+        studentClass: document.getElementById('class').value,
+        pickupPause: document.getElementById('pause').value,
+        items: itemsList,
+        totalPrice: document.getElementById('total-price').innerText
+      };
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        alert("Bestellung erfolgreich erhalten! Bitte halte das Geld in der Pause bereit.");
+        location.reload();
+      } catch (err) {
+        alert("Fehler beim Senden. Bitte versuche es erneut.");
+        btn.disabled = false;
+        btn.innerText = "Verbindlich vorbestellen";
+      }
+    });
+
+    loadProducts();
+  </script>
+</body>
+</html>

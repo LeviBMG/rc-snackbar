@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RC Snackbar - Click & Collect</title>
+  <!-- jsPDF Bibliothek für automatische PDF-Kassenzettel -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root {
       --primary: #FF6B00;
@@ -68,7 +70,6 @@
       margin-bottom: 16px;
     }
 
-    /* Login-Fenster Zentrierung */
     .login-container {
       max-width: 400px;
       margin: 40px auto;
@@ -99,6 +100,7 @@
       font-size: 1.1rem;
     }
 
+    /* 4 Produkte pro Zeile */
     .product-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -276,7 +278,7 @@
 <div class="container">
   <header>
     <h1>RC Snackbar</h1>
-    <p>Click & Collect – Raiffeisen-Campus Dernbach</p>
+    <p>Click & Collect – Raiffeisen-Campus Dernbach eSG</p>
     <div id="auth-status" class="hidden" style="margin-top: 8px;">
       <span class="user-badge">👤 <span id="logged-user-name"></span> (<span id="logged-user-class"></span>)</span>
       <button class="btn-secondary" style="margin: 0 0 0 8px; text-decoration: underline;" onclick="logout()">Abmelden</button>
@@ -288,7 +290,7 @@
     <div class="card">
       <h2 style="text-align: center;">Anmeldung mit WebUntis</h2>
       <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
-        Melde dich mit deinen WebUntis-Zugangsdaten vom Raiffeisen-Campus an.
+        Melde dich mit deinen gewohnten WebUntis-Zugangsdaten vom Raiffeisen-Campus an.
       </p>
 
       <form id="login-form" onsubmit="handleLogin(event)">
@@ -304,7 +306,7 @@
 
         <div class="form-group">
           <label for="untisClass">Deine Klasse / Stufe</label>
-          <input type="text" id="untisClass" placeholder="z. B. 8b oder MSS11" required>
+          <input type="text" id="untisClass" placeholder="z. B. 9b oder MSS11" required>
         </div>
 
         <div id="login-error" class="error-msg hidden">Anmeldung fehlgeschlagen. Bitte prüfe deine Zugangsdaten.</div>
@@ -336,7 +338,7 @@
 
   </div>
 
-  <!-- FENSTER 3: CHECKOUT / ABHOLDATEN -->
+  <!-- FENSTER 3: CHECKOUT / KALENDER & PAUSENAUSWAHL -->
   <div id="step-checkout" class="hidden">
     <button class="btn-secondary" onclick="backToSelection()">← Zurück zur Auswahl</button>
 
@@ -351,7 +353,7 @@
     </div>
 
     <div class="card">
-      <h2>Abholdaten bestätigen</h2>
+      <h2>Abholdatum & Pausenzeiten wählen</h2>
       <form id="order-form" onsubmit="submitOrder(event)">
         <div class="form-group">
           <label>Name & Vorname (Verifiziert via WebUntis)</label>
@@ -363,16 +365,21 @@
           <input type="text" id="studentClass" readonly style="background: #E2E8F0; cursor: not-allowed;">
         </div>
 
+        <!-- KALENDER DROPDOWN -->
         <div class="form-group">
-          <label for="pickupPause">Abholpause wählen</label>
+          <label for="pickupDate">Abholdatum wählen</label>
+          <input type="date" id="pickupDate" required onchange="updatePauseOptions()">
+        </div>
+
+        <!-- DYNAMISCHE PAUSENAUSWAHL BASIEREND AUF DEM STUNDENPLAN -->
+        <div class="form-group">
+          <label for="pickupPause">Abholpause / Verkaufsfenster</label>
           <select id="pickupPause" required>
-            <option value="">Bitte wählen...</option>
-            <option value="1. Pause">1. Pause</option>
-            <option value="2. Pause">2. Pause</option>
+            <option value="">Bitte zuerst Datum wählen...</option>
           </select>
         </div>
 
-        <button type="submit" class="btn-primary">Kostenpflichtig bestellen</button>
+        <button type="submit" class="btn-primary" id="submit-btn">Kostenpflichtig bestellen & Kassenzettel herunterladen</button>
       </form>
     </div>
   </div>
@@ -380,20 +387,20 @@
 </div>
 
 <script>
-  // Eure Google Apps Script Exec-URL
+  // Google Apps Script Web-App URL
   const API_URL = "https://script.google.com/macros/s/AKfycbwwBaAQcwmMrbOtsyQ3O4LzFyA9GZ58Iy9WBqS773zPzEYOsWRXvHUUXoTTmkrZmj19bQ/exec";
 
-  // WebUntis Konfiguration für den Raiffeisen-Campus Dernbach
+  // WebUntis Daten des Raiffeisen-Campus Dernbach
   const UNTIS_SCHOOL = "raiffeisen-campus";
   const UNTIS_SERVER = "raiffeisen-campus.webuntis.com";
 
   let products = [];
   let cartQuantities = {};
-  
-  // Authentifizierungs-Status
   let currentUser = null; 
 
-  // Checkt beim Wechsel in ein neues Fenster, ob der Nutzer authentifiziert ist
+  // Datumseingabe ab heute begrenzen
+  document.getElementById('pickupDate').min = new Date().toISOString().split('T')[0];
+
   function requireAuth() {
     if (!currentUser) {
       alert("Aktion verweigert: Bitte melde dich zuerst über WebUntis an!");
@@ -412,7 +419,7 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // LOGIN DURCHFÜHREN (WebUntis Authentifizierung)
+  // LOGIN VIA WEBUNTIS
   async function handleLogin(e) {
     e.preventDefault();
     const btn = document.getElementById('login-btn');
@@ -431,11 +438,7 @@
       const payload = {
         id: "rc_snackbar_auth",
         method: "authenticate",
-        params: {
-          user: username,
-          password: password,
-          client: "RC_Snackbar"
-        },
+        params: { user: username, password: password, client: "RC_Snackbar" },
         jsonrpc: "2.0"
       };
 
@@ -467,7 +470,7 @@
         errEl.classList.remove('hidden');
       }
     } catch (err) {
-      // Fallback für den lokalen Testlauf
+      // Fallback für Testzwecke
       currentUser = {
         username: username,
         name: username.replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase()),
@@ -493,6 +496,54 @@
     document.getElementById('auth-status').classList.add('hidden');
     document.getElementById('login-form').reset();
     showWindow('step-login');
+  }
+
+  // EXAKTE PAUSENAUSWAHL ANHAND DES STUNDENPLANS DER KLASSE 9B
+  function updatePauseOptions() {
+    const dateInput = document.getElementById('pickupDate').value;
+    const pauseSelect = document.getElementById('pickupPause');
+    pauseSelect.innerHTML = '';
+
+    if (!dateInput) return;
+
+    const selectedDate = new Date(dateInput);
+    const dayOfWeek = selectedDate.getDay(); // 0 = So, 1 = Mo, 2 = Di, 3 = Mi, 4 = Do, 5 = Fr, 6 = Sa
+
+    let options = [];
+
+    if (dayOfWeek === 1) { // MONTAG (Wirtschaft in der 6. Std.)
+      options = [
+        "1. Pause (09:10 - 09:25 Uhr)",
+        "2. Pause (10:25 - 10:40 Uhr)",
+        "Mittagspause / Vor 6. Std. Wirtschaft (13:30 - 13:45 Uhr)",
+        "6. Pause (Nach 6. Std. Wirtschaft / 15:00 Uhr)"
+      ];
+    } else if (dayOfWeek === 3 || dayOfWeek === 4) { // MITTWOCH & DONNERSTAG (Wirtschaft in der 3. Std.)
+      options = [
+        "1. Pause (09:10 - 09:25 Uhr)",
+        "2. Pause / Vor 3. Std. Wirtschaft (10:25 - 10:40 Uhr)",
+        "Mittagspause (13:30 - 13:45 Uhr)"
+      ];
+    } else if (dayOfWeek === 2 || dayOfWeek === 5) { // DIENSTAG & FREITAG
+      options = [
+        "1. Pause (09:10 - 09:25 Uhr)",
+        "2. Pause (10:25 - 10:40 Uhr)",
+        "Mittagspause (13:30 - 13:45 Uhr)"
+      ];
+    } else { // WOCHENENDE
+      const el = document.createElement('option');
+      el.value = "";
+      el.innerText = "Am Wochenende findet kein Verkauf statt!";
+      pauseSelect.appendChild(el);
+      return;
+    }
+
+    options.forEach(opt => {
+      const el = document.createElement('option');
+      el.value = opt;
+      el.innerText = opt;
+      pauseSelect.appendChild(el);
+    });
   }
 
   async function loadProducts() {
@@ -606,6 +657,74 @@
     showWindow('step-selection');
   }
 
+  // AUTOMATISCHER PDF-KASSENZETTEL DOWNLOAD
+  function generateReceiptPDF(orderData) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
+      unit: 'mm',
+      format: [80, 160] // Kassenzettel-Format
+    });
+
+    const orderId = "RC-" + Math.floor(100000 + Math.random() * 900000);
+    const now = new Date().toLocaleString('de-DE');
+
+    // Header
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.text("RC SNACKBAR", 40, 12, { align: "center" });
+
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.text("Raiffeisen-Campus Dernbach eSG", 40, 16, { align: "center" });
+    doc.text("--------------------------------------------------", 40, 20, { align: "center" });
+
+    // Kundendaten
+    doc.setFontSize(8);
+    doc.text(`Bestell-Nr: ${orderId}`, 6, 25);
+    doc.text(`Datum: ${now}`, 6, 29);
+    doc.text(`Kunde: ${orderData.studentName}`, 6, 33);
+    doc.text(`Klasse: ${orderData.studentClass}`, 6, 37);
+    doc.text(`Abholdatum: ${orderData.pickupDate}`, 6, 41);
+    doc.text(`Verkaufsfenster:`, 6, 45);
+    doc.setFont("helvetica", "bold");
+    doc.text(`${orderData.pickupPause}`, 6, 49);
+    doc.setFont("helvetica", "normal");
+    doc.text("--------------------------------------------------", 40, 53, { align: "center" });
+
+    // Artikelaufstellung
+    let yPos = 58;
+    doc.setFont("helvetica", "bold");
+    doc.text("Artikel", 6, yPos);
+    doc.text("Summe", 74, yPos, { align: "right" });
+    yPos += 4;
+    doc.setFont("helvetica", "normal");
+
+    orderData.items.forEach(item => {
+      doc.text(`1x ${item}`, 6, yPos);
+      yPos += 4;
+    });
+
+    doc.text("--------------------------------------------------", 40, yPos, { align: "center" });
+    yPos += 5;
+
+    // Gesamtsumme
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text("GESAMT:", 6, yPos);
+    doc.text(`${orderData.totalPrice} €`, 74, yPos, { align: "right" });
+
+    yPos += 8;
+    doc.setFontSize(7);
+    doc.setFont("helvetica", "italic");
+    doc.text("Vielen Dank für deine Vorbestellung!", 40, yPos, { align: "center" });
+    yPos += 4;
+    doc.text("Bitte zeige diesen Bon bei der Abholung vor.", 40, yPos, { align: "center" });
+
+    // PDF speichern
+    doc.save(`Kassenzettel_${orderData.studentName.replace(/\s+/g, '_')}_${orderId}.pdf`);
+  }
+
+  // BESTELLUNG ABSENDEN
   async function submitOrder(e) {
     e.preventDefault();
 
@@ -619,13 +738,21 @@
       }
     });
 
+    const pickupDate = document.getElementById('pickupDate').value;
+    const pickupPause = document.getElementById('pickupPause').value;
+
     const payload = {
       studentName: currentUser.name,
       studentClass: currentUser.userClass,
-      pickupPause: document.getElementById('pickupPause').value,
+      pickupDate: pickupDate,
+      pickupPause: pickupPause,
       items: selectedItems,
       totalPrice: calculateTotal().toFixed(2).replace('.', ',')
     };
+
+    const submitBtn = document.getElementById('submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Bestellung wird übermittelt...";
 
     try {
       const res = await fetch(API_URL, {
@@ -635,7 +762,10 @@
 
       const result = await res.json();
       if (result.status === "success") {
-        alert("Bestellung erfolgreich aufgegeben!");
+        // PDF-Kassenzettel erzeugen
+        generateReceiptPDF(payload);
+
+        alert("Bestellung erfolgreich aufgegeben! Dein Kassenzettel-PDF wurde automatisch heruntergeladen.");
         cartQuantities = {};
         renderGrids();
         calculateTotal();
@@ -646,6 +776,9 @@
       }
     } catch (err) {
       alert("Netzwerkfehler beim Absenden der Bestellung.");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerText = "Kostenpflichtig bestellen & Kassenzettel herunterladen";
     }
   }
 </script>

@@ -536,6 +536,15 @@
 
     document.getElementById('pickupDate').min = new Date().toISOString().split('T')[0];
 
+    // SICHERS PARSEN VON PREISEN (HANDHABT "1,50", "1.50 €", UND ABSENT/UNDEFINED)
+    function parsePrice(val) {
+      if (val === undefined || val === null) return 0;
+      if (typeof val === 'number') return isNaN(val) ? 0 : val;
+      let str = String(val).replace('€', '').trim().replace(',', '.');
+      let num = parseFloat(str);
+      return isNaN(num) ? 0 : num;
+    }
+
     function toggleAgbModal(show) {
       document.getElementById('agb-modal').classList.toggle('hidden', !show);
     }
@@ -628,7 +637,6 @@
       showWindow('step-login');
     }
 
-    // SCHLICHTE PAUSENAUSWAHL
     function updatePauseOptions() {
       const dateInput = document.getElementById('pickupDate').value;
       const pauseSelect = document.getElementById('pickupPause');
@@ -653,6 +661,7 @@
           "1. Pause",
           "2. Pause",
           "Mittagspause"
+          "6. Pause (Letzte Pause)"
         ];
       } else if (dayOfWeek === 5) { // FREITAG
         options = [
@@ -697,7 +706,7 @@
         cartQuantities[idx] = cartQuantities[idx] || 0;
         const cardHtml = createProductCard(p, idx);
 
-        if (p.isAction) {
+        if (p.isAction || p.aktion || p.Aktion) {
           actionGrid.appendChild(cardHtml);
           hasActions = true;
         } else {
@@ -707,29 +716,36 @@
 
       if (!hasActions) {
         document.getElementById('action-section').style.display = 'none';
+      } else {
+        document.getElementById('action-section').style.display = 'block';
       }
     }
 
     function createProductCard(p, idx) {
       const card = document.createElement('div');
-      const isSoldOut = p.stock !== undefined && Number(p.stock) <= 0;
+      const stockVal = p.stock !== undefined ? p.stock : (p.bestand !== undefined ? p.bestand : p.Bestand);
+      const isSoldOut = stockVal !== undefined && Number(stockVal) <= 0;
+      const priceVal = parsePrice(p.price || p.preis || p.Preis);
 
       card.className = `product-card ${isSoldOut ? 'sold-out' : ''}`;
       
       let badgeHtml = '';
       if (isSoldOut) {
         badgeHtml = '<span class="badge badge-out">Ausverkauft</span>';
-      } else if (p.isAction) {
+      } else if (p.isAction || p.aktion || p.Aktion) {
         badgeHtml = '<span class="badge badge-action">Aktion</span>';
       }
+
+      const nameVal = p.name || p.Name || p.titel || "Produkt";
+      const imgVal = p.image || p.bild || p.Bild || '';
 
       card.innerHTML = `
         ${badgeHtml}
         <div class="product-img-wrap">
-          <img src="${p.image}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/150?text=Kein+Bild'">
+          <img src="${imgVal}" alt="${nameVal}" onerror="this.src='https://via.placeholder.com/150?text=Kein+Bild'">
         </div>
-        <div class="product-title">${p.name}</div>
-        <div class="product-price">${Number(p.price).toFixed(2).replace('.', ',')} €</div>
+        <div class="product-title">${nameVal}</div>
+        <div class="product-price">${priceVal.toFixed(2).replace('.', ',')} €</div>
         <div class="qty-controls">
           <button class="qty-btn" onclick="updateQty(${idx}, -1)" ${isSoldOut ? 'disabled' : ''}>-</button>
           <span class="qty-display" id="qty-${idx}">${cartQuantities[idx]}</span>
@@ -744,7 +760,8 @@
 
       const p = products[idx];
       const current = cartQuantities[idx] || 0;
-      const maxStock = p.stock !== undefined ? Number(p.stock) : 99;
+      const stockVal = p.stock !== undefined ? p.stock : (p.bestand !== undefined ? p.bestand : p.Bestand);
+      const maxStock = stockVal !== undefined ? Number(stockVal) : 99;
 
       let next = current + change;
       if (next > maxStock) {
@@ -762,7 +779,8 @@
       let total = 0;
       products.forEach((p, idx) => {
         const qty = cartQuantities[idx] || 0;
-        total += qty * Number(p.price);
+        const priceVal = parsePrice(p.price || p.preis || p.Preis);
+        total += qty * priceVal;
       });
 
       const formatted = total.toFixed(2).replace('.', ',') + " €";
@@ -792,11 +810,13 @@
       products.forEach((p, idx) => {
         const qty = cartQuantities[idx];
         if (qty > 0) {
+          const priceVal = parsePrice(p.price || p.preis || p.Preis);
+          const nameVal = p.name || p.Name || p.titel || "Produkt";
           const itemRow = document.createElement('div');
           itemRow.style.cssText = "display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95rem;";
           itemRow.innerHTML = `
-            <span><strong>${qty}x</strong> ${p.name}</span>
-            <span>${(qty * Number(p.price)).toFixed(2).replace('.', ',')} €</span>
+            <span><strong>${qty}x</strong> ${nameVal}</span>
+            <span>${(qty * priceVal).toFixed(2).replace('.', ',')} €</span>
           `;
           summaryList.appendChild(itemRow);
         }
@@ -879,8 +899,9 @@
       const selectedItems = [];
       products.forEach((p, idx) => {
         const qty = cartQuantities[idx];
+        const nameVal = p.name || p.Name || p.titel || "Produkt";
         for (let i = 0; i < qty; i++) {
-          selectedItems.push(p.name);
+          selectedItems.push(nameVal);
         }
       });
 

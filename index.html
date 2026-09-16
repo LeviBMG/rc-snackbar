@@ -6,7 +6,7 @@
   <title>RC Snackbar - Click & Collect</title>
   <style>
     :root {
-      --primary: #FF6B00; /* Modernes Orange */
+      --primary: #FF6B00;
       --primary-hover: #E05E00;
       --bg: #F4F5F7;
       --card-bg: #FFFFFF;
@@ -32,7 +32,7 @@
 
     .container {
       width: 100%;
-      max-width: 480px;
+      max-width: 1000px;
     }
 
     header {
@@ -41,7 +41,7 @@
     }
 
     header h1 {
-      font-size: 1.5rem;
+      font-size: 1.8rem;
       font-weight: 700;
       margin: 0;
       color: var(--text);
@@ -49,82 +49,150 @@
 
     header p {
       color: var(--text-muted);
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       margin-top: 4px;
     }
 
-    /* Karussell / Slider für hervorgehobenes Produkt */
-    .featured-container {
-      position: relative;
+    .card {
       background: var(--card-bg);
       border-radius: var(--radius);
-      padding: 24px 20px;
-      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+      padding: 20px;
       border: 1px solid var(--border);
-      text-align: center;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+
+    .card h2 {
+      font-size: 1.2rem;
+      margin-top: 0;
+      margin-bottom: 16px;
+    }
+
+    /* Aktions-Reiter Banner */
+    .action-banner {
+      background: #FFF5EE;
+      border: 1.5px solid var(--primary);
+      border-radius: var(--radius);
+      padding: 16px 20px;
       margin-bottom: 24px;
     }
 
-    .featured-badge {
-      display: inline-block;
-      background: rgba(255, 107, 0, 0.1);
+    .action-banner h2 {
       color: var(--primary);
-      font-size: 0.75rem;
+      margin: 0 0 12px 0;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* 4-spaltiges Produkte-Raster */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 500px) {
+      .product-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .product-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: center;
+      position: relative;
+    }
+
+    .product-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: rgba(255, 107, 0, 0.15);
+      color: var(--primary);
+      font-size: 0.65rem;
       font-weight: 700;
-      padding: 4px 12px;
-      border-radius: 20px;
-      margin-bottom: 12px;
+      padding: 2px 8px;
+      border-radius: 12px;
       text-transform: uppercase;
     }
 
-    .featured-img-wrap {
+    .product-img-wrap {
       width: 100%;
-      height: 200px;
+      height: 110px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 16px;
+      margin-bottom: 8px;
+      margin-top: 8px;
     }
 
-    .featured-img-wrap img {
+    .product-img-wrap img {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
-      border-radius: 12px;
     }
 
     .product-title {
-      font-size: 1.3rem;
-      font-weight: 700;
-      margin: 0 0 4px 0;
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin: 4px 0;
+      min-height: 2.4em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .product-price {
-      font-size: 1.2rem;
-      font-weight: 600;
+      font-size: 1rem;
+      font-weight: 700;
       color: var(--primary);
-      margin-bottom: 16px;
+      margin-bottom: 8px;
     }
 
-    /* Slider Steuerung */
-    .nav-btn {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: var(--card-bg);
+    /* Mengen-Steuerung (+ / -) */
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .qty-btn {
+      background: var(--bg);
       border: 1px solid var(--border);
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      cursor: pointer;
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
       font-weight: bold;
-      color: var(--text);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      cursor: pointer;
+      font-size: 1rem;
     }
-    .nav-btn.prev { left: -12px; }
-    .nav-btn.next { right: -12px; }
 
-    /* Buttons & Formulare */
+    .qty-btn:hover {
+      background: #E2E8F0;
+    }
+
+    .qty-display {
+      font-weight: 600;
+      width: 20px;
+      text-align: center;
+    }
+
+    /* Formular & Buttons */
     .btn-primary {
       width: 100%;
       background: var(--primary);
@@ -142,18 +210,14 @@
       background: var(--primary-hover);
     }
 
-    .card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      padding: 20px;
-      border: 1px solid var(--border);
-      margin-bottom: 20px;
-    }
-
-    .card h2 {
-      font-size: 1.1rem;
-      margin-top: 0;
-      margin-bottom: 16px;
+    .btn-secondary {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+      padding: 0;
     }
 
     .form-group {
@@ -183,57 +247,26 @@
       background: #FFF;
     }
 
-    /* Warenkorb Liste */
-    .cart-item {
+    .hidden {
+      display: none;
+    }
+
+    .sticky-bar {
+      position: sticky;
+      bottom: 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px dashed var(--border);
-      font-size: 0.95rem;
     }
 
-    .cart-item:last-child {
-      border-bottom: none;
-    }
-
-    .cart-total {
-      display: flex;
-      justify-content: space-between;
-      font-weight: 700;
+    .total-info {
       font-size: 1.1rem;
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 2px solid var(--border);
-    }
-
-    .remove-btn {
-      background: none;
-      border: none;
-      color: #E53E3E;
-      cursor: pointer;
-      font-size: 0.85rem;
-      margin-left: 8px;
-    }
-
-    .dots {
-      display: flex;
-      justify-content: center;
-      gap: 6px;
-      margin-top: 12px;
-    }
-
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--border);
-    }
-
-    .dot.active {
-      background: var(--primary);
-      width: 16px;
-      border-radius: 4px;
+      font-weight: 700;
     }
   </style>
 </head>
@@ -245,177 +278,207 @@
     <p>Click & Collect – Vorbestellen & Abholen</p>
   </header>
 
-  <!-- Fokus-Produkt Slider -->
-  <div class="featured-container">
-    <button class="nav-btn prev" onclick="changeProduct(-1)">&#10094;</button>
-    <button class="nav-btn next" onclick="changeProduct(1)">&#10095;</button>
-
-    <div id="featured-card">
-      <span class="featured-badge" id="p-badge">Snack</span>
-      <div class="featured-img-wrap">
-        <img id="p-img" src="" alt="Produktbild" onerror="this.src='https://via.placeholder.com/200x200?text=Kein+Bild'">
-      </div>
-      <h3 class="product-title" id="p-title">Lade Produkte...</h3>
-      <div class="product-price" id="p-price">0,00 €</div>
-      <button class="btn-primary" onclick="addToCart()">In den Warenkorb</button>
+  <!-- SCHRITT 1: PRODUKTAUSWAHL -->
+  <div id="step-selection">
+    
+    <!-- Aktions-Reiter oben -->
+    <div class="action-banner" id="action-section">
+      <h2>🔥 Aktuelle Aktionen</h2>
+      <div class="product-grid" id="action-grid"></div>
     </div>
 
-    <div class="dots" id="dots-container"></div>
-  </div>
-
-  <!-- Warenkorb & Bestellung -->
-  <div class="card">
-    <h2>Deine Bestellung</h2>
-    <div id="cart-list">
-      <p style="color: var(--text-muted); font-size: 0.9rem;">Noch keine Artikel im Warenkorb.</p>
+    <!-- Alle Produkte Raster -->
+    <div class="card">
+      <h2>Alle Produkte</h2>
+      <div class="product-grid" id="all-grid"></div>
     </div>
-    <div class="cart-total">
-      <span>Gesamt:</span>
-      <span id="cart-total-price">0,00 €</span>
+
+    <!-- Sticky Leiste unten zum Weitergehen -->
+    <div class="sticky-bar">
+      <div class="total-info">
+        Gesamt: <span id="summary-price" style="color: var(--primary);">0,00 €</span>
+      </div>
+      <button class="btn-primary" style="width: auto; padding: 12px 24px;" onclick="goToCheckout()">Weiter zur Abholung 🔥</button>
+    </div>
+
+  </div>
+
+  <!-- SCHRITT 2: FORMULAR (ABHOLDATEN) -->
+  <div id="step-checkout" class="hidden">
+    <button class="btn-secondary" onclick="backToSelection()">← Zurück zur Auswahl</button>
+
+    <div class="card">
+      <h2>Bestellübersicht</h2>
+      <div id="checkout-summary-list"></div>
+      <hr style="border: 0; border-top: 1px dashed var(--border); margin: 12px 0;">
+      <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.1rem;">
+        <span>Gesamtsumme:</span>
+        <span id="checkout-total-price" style="color: var(--primary);">0,00 €</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Abholdaten eintragen</h2>
+      <form id="order-form" onsubmit="submitOrder(event)">
+        <div class="form-group">
+          <label for="studentName">Name & Vorname</label>
+          <input type="text" id="studentName" placeholder="z. B. Max Mustermann" required>
+        </div>
+
+        <div class="form-group">
+          <label for="studentClass">Klasse / Stufe</label>
+          <input type="text" id="studentClass" placeholder="z. B. 8b oder MSS11" required>
+        </div>
+
+        <div class="form-group">
+          <label for="pickupPause">Abholpause</label>
+          <select id="pickupPause" required>
+            <option value="">Bitte wählen...</option>
+            <option value="1. Pause">1. Pause</option>
+            <option value="2. Pause">2. Pause</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-primary">Kostenpflichtig bestellen</button>
+      </form>
     </div>
   </div>
 
-  <!-- Abholdaten -->
-  <div class="card">
-    <h2>Abholdaten</h2>
-    <form id="order-form" onsubmit="submitOrder(event)">
-      <div class="form-group">
-        <label for="studentName">Name & Vorname</label>
-        <input type="text" id="studentName" placeholder="z. B. Max Mustermann" required>
-      </div>
-
-      <div class="form-group">
-        <label for="studentClass">Klasse / Stufe</label>
-        <input type="text" id="studentClass" placeholder="z. B. 8b oder MSS11" required>
-      </div>
-
-      <div class="form-group">
-        <label for="pickupPause">Abholpause</label>
-        <select id="pickupPause" required>
-          <option value="">Bitte wählen...</option>
-          <option value="1. Pause">1. Pause</option>
-          <option value="2. Pause">2. Pause</option>
-        </select>
-      </div>
-
-      <button type="submit" class="btn-primary" style="margin-top: 10px;">Kostenpflichtig bestellen</button>
-    </form>
-  </div>
 </div>
 
 <script>
-  // ERSETZE DIESE URL MIT DEINER APPS SCRIPT EXEC-URL!
   const API_URL = "https://script.google.com/macros/s/AKfycbwwBaAQcwmMrbOtsyQ3O4LzFyA9GZ58Iy9WBqS773zPzEYOsWRXvHUUXoTTmkrZmj19bQ/exec";
 
   let products = [];
-  let currentIndex = 0;
-  let cart = [];
+  let cartQuantities = {}; // Speichert die Menge pro Produkt Index { 0: 2, 2: 1 }
 
-  // Produkte vom Backend laden
   async function loadProducts() {
     try {
       const res = await fetch(API_URL);
       products = await res.json();
-      if (products.length > 0) {
-        renderProduct();
-        renderDots();
-      }
+      renderGrids();
     } catch (e) {
-      document.getElementById('p-title').innerText = "Fehler beim Laden";
+      alert("Fehler beim Laden der Produkte.");
     }
   }
 
-  function renderProduct() {
-    const p = products[currentIndex];
-    document.getElementById('p-title').innerText = p.name;
-    document.getElementById('p-price').innerText = Number(p.price).toFixed(2).replace('.', ',') + " €";
-    document.getElementById('p-badge').innerText = p.isAction ? "Aktion" : "Snack";
-    
-    // Bildpfad auf GitHub Pages oder Unterordner `images/` festlegen
-    document.getElementById('p-img').src = p.image;
+  function renderGrids() {
+    const actionGrid = document.getElementById('action-grid');
+    const allGrid = document.getElementById('all-grid');
+    actionGrid.innerHTML = '';
+    allGrid.innerHTML = '';
 
-    updateDots();
-  }
+    let hasActions = false;
 
-  function changeProduct(direction) {
-    if (products.length === 0) return;
-    currentIndex = (currentIndex + direction + products.length) % products.length;
-    renderProduct();
-  }
+    products.forEach((p, idx) => {
+      cartQuantities[idx] = cartQuantities[idx] || 0;
+      const cardHtml = createProductCard(p, idx);
 
-  function renderDots() {
-    const dotsWin = document.getElementById('dots-container');
-    dotsWin.innerHTML = '';
-    products.forEach((_, idx) => {
-      const dot = document.createElement('div');
-      dot.className = `dot ${idx === currentIndex ? 'active' : ''}`;
-      dotsWin.appendChild(dot);
+      if (p.isAction) {
+        actionGrid.appendChild(cardHtml);
+        hasActions = true;
+      } else {
+        allGrid.appendChild(cardHtml);
+      }
     });
+
+    if (!hasActions) {
+      document.getElementById('action-section').style.display = 'none';
+    }
   }
 
-  function updateDots() {
-    const dots = document.querySelectorAll('.dot');
-    dots.forEach((dot, idx) => {
-      dot.classList.toggle('active', idx === currentIndex);
+  function createProductCard(p, idx) {
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.innerHTML = `
+      ${p.isAction ? '<span class="product-badge">Aktion</span>' : ''}
+      <div class="product-img-wrap">
+        <img src="${p.image}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/150?text=Kein+Bild'">
+      </div>
+      <div class="product-title">${p.name}</div>
+      <div class="product-price">${Number(p.price).toFixed(2).replace('.', ',')} €</div>
+      <div class="qty-controls">
+        <button class="qty-btn" onclick="updateQty(${idx}, -1)">-</button>
+        <span class="qty-display" id="qty-${idx}">${cartQuantities[idx]}</span>
+        <button class="qty-btn" onclick="updateQty(${idx}, 1)">+</button>
+      </div>
+    `;
+    return card;
+  }
+
+  function updateQty(idx, change) {
+    const current = cartQuantities[idx] || 0;
+    const next = Math.max(0, current + change);
+    cartQuantities[idx] = next;
+
+    document.getElementById(`qty-${idx}`).innerText = next;
+    calculateTotal();
+  }
+
+  function calculateTotal() {
+    let total = 0;
+    products.forEach((p, idx) => {
+      const qty = cartQuantities[idx] || 0;
+      total += qty * Number(p.price);
     });
+
+    const formatted = total.toFixed(2).replace('.', ',') + " €";
+    document.getElementById('summary-price').innerText = formatted;
+    document.getElementById('checkout-total-price').innerText = formatted;
+    return total;
   }
 
-  function addToCart() {
-    if (products.length === 0) return;
-    const p = products[currentIndex];
-    cart.push(p);
-    renderCart();
-  }
-
-  function removeFromCart(index) {
-    cart.splice(index, 1);
-    renderCart();
-  }
-
-  function renderCart() {
-    const cartList = document.getElementById('cart-list');
-    const totalEl = document.getElementById('cart-total-price');
-
-    if (cart.length === 0) {
-      cartList.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">Noch keine Artikel im Warenkorb.</p>';
-      totalEl.innerText = "0,00 €";
+  function goToCheckout() {
+    const total = calculateTotal();
+    if (total === 0) {
+      alert("Bitte wähle mindestens ein Produkt aus!");
       return;
     }
 
-    cartList.innerHTML = '';
-    let total = 0;
+    // Zusammenfassung im Checkout aufbauen
+    const summaryList = document.getElementById('checkout-summary-list');
+    summaryList.innerHTML = '';
 
-    cart.forEach((item, index) => {
-      total += Number(item.price);
-      const row = document.createElement('div');
-      row.className = 'cart-item';
-      row.innerHTML = `
-        <span>${item.name}</span>
-        <div>
-          <span>${Number(item.price).toFixed(2).replace('.', ',')} €</span>
-          <button class="remove-btn" onclick="removeFromCart(${index})">✕</button>
-        </div>
-      `;
-      cartList.appendChild(row);
+    products.forEach((p, idx) => {
+      const qty = cartQuantities[idx];
+      if (qty > 0) {
+        const itemRow = document.createElement('div');
+        itemRow.style.cssText = "display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.95rem;";
+        itemRow.innerHTML = `
+          <span>${qty}x ${p.name}</span>
+          <span>${(qty * Number(p.price)).toFixed(2).replace('.', ',')} €</span>
+        `;
+        summaryList.appendChild(itemRow);
+      }
     });
 
-    totalEl.innerText = total.toFixed(2).replace('.', ',') + " €";
+    document.getElementById('step-selection').classList.add('hidden');
+    document.getElementById('step-checkout').classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function backToSelection() {
+    document.getElementById('step-checkout').classList.add('hidden');
+    document.getElementById('step-selection').classList.remove('hidden');
   }
 
   async function submitOrder(e) {
     e.preventDefault();
 
-    if (cart.length === 0) {
-      alert("Dein Warenkorb ist leer!");
-      return;
-    }
+    const selectedItems = [];
+    products.forEach((p, idx) => {
+      const qty = cartQuantities[idx];
+      for (let i = 0; i < qty; i++) {
+        selectedItems.push(p.name);
+      }
+    });
 
     const payload = {
       studentName: document.getElementById('studentName').value,
       studentClass: document.getElementById('studentClass').value,
       pickupPause: document.getElementById('pickupPause').value,
-      items: cart.map(i => i.name),
-      totalPrice: cart.reduce((sum, i) => sum + Number(i.price), 0).toFixed(2).replace('.', ',')
+      items: selectedItems,
+      totalPrice: calculateTotal().toFixed(2).replace('.', ',')
     };
 
     try {
@@ -427,9 +490,11 @@
       const result = await res.json();
       if (result.status === "success") {
         alert("Bestellung erfolgreich aufgegeben!");
-        cart = [];
-        renderCart();
+        cartQuantities = {};
+        renderGrids();
+        calculateTotal();
         document.getElementById('order-form').reset();
+        backToSelection();
       } else {
         alert("Fehler bei der Bestellung. Bitte versuche es erneut.");
       }

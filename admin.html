@@ -1,330 +1,183 @@
 <!DOCTYPE html>
 <html lang="de">
+<!--
+  =========================================================
+  RC-Snackbar eSG - Admin Bestellpanel
+  Version: Beta v0.9.6
+  =========================================================
+-->
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kiosk Admin - RC-Snackbar eSG</title>
+  <title>RC-Snackbar eSG - Admin Bestellpanel (Beta v0.9.6)</title>
   <style>
     :root {
       --esg-navy: #1B2B4C;
       --esg-orange: #E87722;
+      --esg-grey: #8A8D8F;
       --esg-light-grey: #F2F4F7;
       --bg: #F8FAFC;
       --card-bg: #FFFFFF;
+      --text: #0F172A;
       --border: #E2E8F0;
       --radius: 12px;
     }
 
-    * { 
-      box-sizing: border-box; 
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-    }
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+
+    .container { max-width: 1200px; margin: 0 auto; }
     
-    body { 
-      background-color: var(--bg); 
-      color: #0F172A; 
-      margin: 0; 
-      padding: 20px; 
-      display: flex; 
-      justify-content: center; 
+    header {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
 
-    .container { 
-      width: 100%; 
-      max-width: 1000px; 
+    h1 { color: var(--esg-navy); margin: 0; font-size: 1.4rem; text-transform: uppercase; }
+    
+    .btn-refresh {
+      background: var(--esg-orange);
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-refresh:hover { background: #D06310; }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 20px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
 
-    .card { 
-      background: var(--card-bg); 
-      border-radius: var(--radius); 
-      padding: 24px; 
-      border: 1px solid var(--border); 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
-      margin-bottom: 20px; 
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    th { background: var(--esg-light-grey); color: var(--esg-navy); font-weight: 700; text-transform: uppercase; font-size: 0.75rem; }
+    
+    .badge-pause { background: #E0F2FE; color: #0369A1; padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; }
+    
+    .btn-done {
+      background: #10B981;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
     }
+    .btn-done:hover { background: #059669; }
 
-    h1, h2 { 
-      color: var(--esg-navy); 
-      margin-top: 0; 
-    }
-
-    .hidden { 
-      display: none !important; 
-    }
-
-    .form-group { 
-      margin-bottom: 16px; 
-    }
-
-    label { 
-      display: block; 
-      font-size: 0.85rem; 
-      font-weight: 700; 
-      margin-bottom: 6px; 
-      color: var(--esg-navy); 
-    }
-
-    input { 
-      width: 100%; 
-      padding: 12px; 
-      border: 1px solid var(--border); 
-      border-radius: 8px; 
-      font-size: 1rem; 
-    }
-
-    .btn-primary { 
-      background: var(--esg-orange); 
-      color: white; 
-      border: none; 
-      padding: 12px 20px; 
-      border-radius: 8px; 
-      font-weight: 700; 
-      cursor: pointer; 
-      width: 100%; 
-    }
-
-    .btn-primary:hover { 
-      background: #D06310; 
-    }
-
-    .btn-refresh { 
-      background: var(--esg-navy); 
-      color: white; 
-      border: none; 
-      padding: 8px 16px; 
-      border-radius: 6px; 
-      font-weight: 700; 
-      cursor: pointer; 
-    }
-
-    .order-table { 
-      width: 100%; 
-      border-collapse: collapse; 
-      margin-top: 12px; 
-    }
-
-    .order-table th, .order-table td { 
-      padding: 12px; 
-      border: 1px solid var(--border); 
-      text-align: left; 
-      font-size: 0.85rem; 
-    }
-
-    .order-table th { 
-      background: var(--esg-light-grey); 
-      color: var(--esg-navy); 
-    }
-
-    .status-badge { 
-      padding: 4px 8px; 
-      border-radius: 4px; 
-      font-weight: bold; 
-      font-size: 0.75rem; 
-      text-transform: uppercase; 
-    }
-
-    .status-offen { 
-      background: #FEF08A; 
-      color: #854D0E; 
-    }
-
-    .status-abgeholt { 
-      background: #DCFCE7; 
-      color: #166534; 
-    }
-
-    .btn-success { 
-      background: #22C55E; 
-      color: white; 
-      border: none; 
-      padding: 6px 12px; 
-      border-radius: 6px; 
-      font-weight: bold; 
-      cursor: pointer; 
-    }
-
-    .login-box { 
-      max-width: 400px; 
-      margin: 60px auto; 
-    }
+    .empty-state { text-align: center; padding: 40px; color: var(--esg-grey); font-weight: 600; }
   </style>
 </head>
 <body>
 
   <div class="container">
-
-    <!-- LOGIN PANEL -->
-    <div id="login-panel" class="card login-box">
-      <h2>Kiosk Login</h2>
-      <form onsubmit="handleLogin(event)">
-        <div class="form-group">
-          <label for="password">Passwort</label>
-          <input type="password" id="password" placeholder="Passwort eingeben" required>
-        </div>
-        <div id="login-error" style="color: #E53E3E; font-size: 0.85rem; margin-bottom: 12px;" class="hidden">
-          Falsches Passwort!
-        </div>
-        <button type="submit" class="btn-primary">Anmelden</button>
-      </form>
-    </div>
-
-    <!-- ADMIN PANEL -->
-    <div id="admin-panel" class="card hidden">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <h2>Kiosk Verkaufspanel</h2>
-        <div>
-          <button class="btn-refresh" onclick="loadKioskOrders()">🔄 Aktualisieren</button>
-          <button class="btn-refresh" style="background: #64748B; margin-left: 8px;" onclick="logout()">Abmelden</button>
-        </div>
+    <header>
+      <div>
+        <h1>RC-Snackbar eSG <span style="font-size: 0.7rem; color: var(--esg-orange);">Admin v0.9.6</span></h1>
+        <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: var(--esg-grey);">Live-Bestellpanel für das Verkaufsteam</p>
       </div>
+      <button class="btn-refresh" onclick="loadOrders()">🔄 Aktualisieren</button>
+    </header>
 
-      <div style="overflow-x: auto;">
-        <table class="order-table">
-          <thead>
-            <tr>
-              <th>Kunde</th>
-              <th>Klasse</th>
-              <th>Abholfenster</th>
-              <th>Artikel</th>
-              <th>Summe</th>
-              <th>Status</th>
-              <th>Aktion</th>
-            </tr>
-          </thead>
-          <tbody id="kiosk-orders-list">
-            <tr><td colspan="7" style="text-align: center;">Lade Bestellungen...</td></tr>
-          </tbody>
-        </table>
+    <div class="card">
+      <h2 style="margin-top: 0; color: var(--esg-navy); font-size: 1.1rem; border-bottom: 2px solid var(--esg-light-grey); padding-bottom: 8px;">Offene Bestellungen</h2>
+      <div id="orders-container">
+        <div class="empty-state">Lade Bestellungen...</div>
       </div>
     </div>
-
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwEmZllT1fg5J1_YiSdAuQXwR-b_xlSmNztxIVme5mBo0Jf97EaFA-YxIYyCIKpf6I-qw/exec";
-    const PLAIN_PASSWORD = "2022";
+    const API_URL = "https://script.google.com/macros/s/AKfycbw9aWpl8uQIkN7JFDNzjNR_3G79c3tdsFeWNpWsUfstYGD3fUbwh0DCUgY1AU6mkxCWFQ/exec";
 
-    function handleLogin(e) {
-      e.preventDefault();
-      const inputPass = document.getElementById('password').value;
-      const errorEl = document.getElementById('login-error');
-
-      if (inputPass === PLAIN_PASSWORD) {
-        errorEl.classList.add('hidden');
-        document.getElementById('login-panel').classList.add('hidden');
-        document.getElementById('admin-panel').classList.remove('hidden');
-        loadKioskOrders();
-      } else {
-        errorEl.classList.remove('hidden');
-      }
-    }
-
-    function logout() {
-      document.getElementById('password').value = '';
-      document.getElementById('admin-panel').classList.add('hidden');
-      document.getElementById('login-panel').classList.remove('hidden');
-    }
-
-    async function loadKioskOrders() {
-      const tbody = document.getElementById('kiosk-orders-list');
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Lade aktuelle Bestellungen...</td></tr>';
+    async function loadOrders() {
+      const container = document.getElementById('orders-container');
+      container.innerHTML = '<div class="empty-state">Lade aktuelle Daten...</div>';
 
       try {
-        const res = await fetch(`${API_URL}?action=getOrders`);
-        const data = await res.json();
-        
-        tbody.innerHTML = '';
+        const res = await fetch(`${API_URL}?action=getOrders`, { method: "GET", redirect: "follow" });
+        const orders = await res.json();
 
-        if (!data || (Array.isArray(data) && data.length === 0)) {
-          tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Keine Bestellungen vorhanden.</td></tr>';
+        if (!Array.isArray(orders) || orders.length === 0) {
+          container.innerHTML = '<div class="empty-state">Aktuell liegen keine offenen Bestellungen vor. 🎉</div>';
           return;
         }
 
-        const rawOrders = Array.isArray(data) ? data : (data.orders || []);
+        let html = `
+          <table>
+            <thead>
+              <tr>
+                <th>Uhrzeit</th>
+                <th>Kunde & Klasse</th>
+                <th>Abholfenster</th>
+                <th>Bestellte Artikel</th>
+                <th>Summe</th>
+                <th>Aktion</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
 
-        if (rawOrders.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Keine Bestellungen gefunden.</td></tr>';
-          return;
-        }
-
-        rawOrders.forEach((o, index) => {
-          let name = '';
-          let userClass = '';
-          let pickup = '';
-          let items = '';
-          let total = '';
-          let status = 'Offen';
-          let rowId = o.row || (index + 2); // Tabellenzeile in Google Sheets
-
-          if (Array.isArray(o)) {
-            // A: Zeitstempel (0), B: Name (1), C: Klasse (2), D: Pause (3), E: Artikel (4), F: Summe (5), G: Status (6)
-            name = o[1] || '-';
-            userClass = o[2] || '-';
-            pickup = o[3] || '-';
-            items = o[4] || '-';
-            total = o[5] || '0,00';
-            status = o[6] || 'Offen';
-          } else if (typeof o === 'object') {
-            name = o.Name || o.name || o.studentName || '-';
-            userClass = o.Klasse || o.userClass || o.studentClass || '-';
-            pickup = o.Pause || o.pickup || o.pickupPause || '-';
-            items = Array.isArray(o.Artikel || o.items) ? (o.Artikel || o.items).join(', ') : (o.Artikel || o.items || '-');
-            total = o.Gesamtsumme || o.total || o.totalPrice || '0,00';
-            status = o.Status || o.status || 'Offen';
+        orders.forEach(o => {
+          if (o.status === "Offen" || !o.status) {
+            const timeStr = new Date(o.timestamp).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+            html += `
+              <tr>
+                <td>${timeStr} Uhr</td>
+                <td><strong>${o.name}</strong><br><span style="font-size:0.75rem; color:var(--esg-grey);">Klasse ${o.class}</span></td>
+                <td><span class="badge-pause">${o.pickup}</span></td>
+                <td>${o.items}</td>
+                <td><strong>${o.total}</strong></td>
+                <td><button class="btn-done" onclick="completeOrder(${o.rowIndex})">Abgeholt / Erledigt ✓</button></td>
+              </tr>
+            `;
           }
-
-          if (name === "Name" || name === "Kunde") return;
-
-          const statusStr = String(status).trim();
-          const isDone = (statusStr === "E" || statusStr.toLowerCase() === "abgeholt" || statusStr.toLowerCase() === "erledigt");
-
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td><strong>${name}</strong></td>
-            <td>${userClass}</td>
-            <td>${pickup}</td>
-            <td>${items}</td>
-            <td><strong>${total.toString().includes('€') ? total : total + ' €'}</strong></td>
-            <td><span class="status-badge ${isDone ? 'status-abgeholt' : 'status-offen'}">${isDone ? 'Abgeholt' : 'Offen'}</span></td>
-            <td>
-              ${isDone ? '✅ Erledigt' : `<button class="btn-success" onclick="markAsPickedUp(${rowId})">Als abgeholt markieren</button>`}
-            </td>
-          `;
-          tbody.appendChild(tr);
         });
 
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+
       } catch (err) {
-        console.error(err);
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">Fehler beim Laden der Bestellungen.</td></tr>';
+        console.error("Fehler beim Laden:", err);
+        container.innerHTML = '<div class="empty-state" style="color: #E53E3E;">Fehler beim Laden der Bestellungen. Bitte URL prüfen.</div>';
       }
     }
 
-    async function markAsPickedUp(rowId) {
+    async function completeOrder(rowIndex) {
+      if (!confirm("Bestellung wirklich als abgeholt markieren und archivieren?")) return;
+
       try {
-        // Sende POST-Request an Apps Script um Spalte G auf 'E' zu setzen
-        await fetch(API_URL, {
+        const res = await fetch(API_URL, {
           method: "POST",
-          mode: "no-cors",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: new URLSearchParams({
-            action: "updateStatus",
-            row: rowId,
-            status: "E"
-          })
+          body: JSON.stringify({ action: "completeOrder", rowIndex: rowIndex })
         });
-
-        // Warten & Liste automatisch neu laden
-        setTimeout(() => {
-          loadKioskOrders();
-        }, 800);
-
+        const result = await res.json();
+        if (result.status === "success") {
+          loadOrders();
+        } else {
+          alert("Fehler beim Aktualisieren.");
+        }
       } catch (err) {
-        console.error(err);
-        alert("Fehler beim Aktualisieren der Bestellung.");
+        alert("Netzwerkfehler.");
       }
     }
+
+    // Automatisch alle 30 Sekunden aktualisieren
+    setInterval(loadOrders, 30000);
+    loadOrders();
   </script>
 </body>
 </html>

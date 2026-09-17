@@ -3,13 +3,13 @@
 <!--
   =========================================================
   RC-Snackbar eSG - Admin Bestellpanel
-  Version: Beta v0.9.8
+  Version: Beta v1.0.0
   =========================================================
 -->
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RC-Snackbar eSG - Bestellübersicht (Beta v0.9.8)</title>
+  <title>RC-Snackbar eSG - Bestellungen (Beta v1.0.0)</title>
   <style>
     :root {
       --esg-navy: #1B2B4C;
@@ -74,6 +74,7 @@
       align-items: center;
       gap: 12px;
       margin-bottom: 8px;
+      flex-wrap: wrap;
     }
 
     .student-name { font-size: 1.15rem; font-weight: 800; color: var(--esg-navy); }
@@ -132,7 +133,7 @@
   <div class="container">
     <header>
       <div>
-        <h1>RC-Snackbar eSG <span style="font-size: 0.65rem; color: var(--esg-orange);">Bestellübersicht v0.9.8</span></h1>
+        <h1>RC-Snackbar eSG <span style="font-size: 0.65rem; color: var(--esg-orange);">Bestellübersicht v1.0.0</span></h1>
       </div>
       <button class="btn-refresh" onclick="loadOrders()">🔄 Aktualisieren</button>
     </header>
@@ -161,34 +162,36 @@
         let html = '';
 
         orders.forEach(o => {
-          // Nur offene oder leere Status anzeigen
-          if (!o.status || o.status.toLowerCase() === "offen") {
-            let timeStr = "Uhrzeit n.v.";
-            if (o.timestamp) {
-              const d = new Date(o.timestamp);
-              if (!isNaN(d.getTime())) {
-                timeStr = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + " Uhr";
-              }
+          let timeStr = "Uhrzeit n.v.";
+          if (o.timestamp) {
+            const d = new Date(o.timestamp);
+            if (!isNaN(d.getTime())) {
+              timeStr = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + " Uhr";
+            } else {
+              timeStr = String(o.timestamp);
             }
-            
-            html += `
-              <div class="order-card">
-                <div class="order-info">
-                  <div class="order-header-line">
-                    <span class="student-name">${o.name || "Unbekannter Kunde"}</span>
-                    <span class="student-class">${o.class || "Klasse n.v."}</span>
-                    <span class="pickup-badge">🕒 ${o.pickup || "Fenster n.v."}</span>
-                  </div>
-                  <div class="order-items"><strong>Bestellung:</strong> ${o.items || "Keine Artikel"}</div>
-                  <div class="order-meta">Eingegangen um ${timeStr}</div>
-                </div>
-                <div class="order-action">
-                  <div class="order-total">${o.total || "0,00 €"}</div>
-                  <button class="btn-archive" onclick="archiveOrder(${o.rowIndex})">Archivieren ✓</button>
-                </div>
-              </div>
-            `;
           }
+          
+          let formattedPrice = String(o.total || "0,00");
+          if (!formattedPrice.includes("€")) formattedPrice += " €";
+
+          html += `
+            <div class="order-card">
+              <div class="order-info">
+                <div class="order-header-line">
+                  <span class="student-name">${o.name}</span>
+                  <span class="student-class">${o.class || 'Klasse n.v.'}</span>
+                  <span class="pickup-badge">🕒 ${o.pickup || 'Pause n.v.'}</span>
+                </div>
+                <div class="order-items"><strong>Bestellung:</strong> ${o.items}</div>
+                <div class="order-meta">Eingegangen um ${timeStr}</div>
+              </div>
+              <div class="order-action">
+                <div class="order-total">${formattedPrice}</div>
+                <button class="btn-archive" onclick="archiveOrder(${o.rowIndex})">Archivieren ✓</button>
+              </div>
+            </div>
+          `;
         });
 
         if (html === '') {
@@ -211,7 +214,7 @@
         });
         const result = await res.json();
         if (result.status === "success") {
-          loadOrders();
+          loadOrders(); // Ansicht sofort aktualisieren
         } else {
           alert("Fehler beim Archivieren.");
         }

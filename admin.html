@@ -240,64 +240,55 @@
           return;
         }
 
-        // Falls das API-Ergebnis verschachtelt ist
         const rawOrders = Array.isArray(data) ? data : (data.orders || []);
 
-        let renderCount = 0;
+        if (rawOrders.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Keine Bestellungen gefunden.</td></tr>';
+          return;
+        }
 
         rawOrders.forEach((o, index) => {
-          // Robustes Mapping für Schlüsselwörter aus verschiedenen Backend-Datenstrukturen
           let name = '';
           let userClass = '';
           let pickup = '';
           let items = '';
           let total = '';
           let status = 'Offen';
-          let rowId = index + 2; // Standard-Zeilenindex in Google Sheets (unter Header)
+          let rowId = o.row || (index + 2); // Tabellenzeile ab A2
 
           if (Array.isArray(o)) {
-            // Falls das Apps Script ein einfaches Zeilen-Array zurückgibt
-            // Erwartetes Format: [Zeitstempel, Name, Klasse, Datum, Pause, Artikel, Summe, Status]
-            name = o[1] || o[0] || '-';
+            // Wenn das Script Zeilen-Arrays liefert:
+            // A: Zeitstempel (0), B: Name (1), C: Klasse (2), D: Pause (3), E: Artikel (4), F: Summe (5), G: Status (6)
+            name = o[1] || '-';
             userClass = o[2] || '-';
-            pickup = (o[3] ? o[3] + ' ' : '') + (o[4] || '');
-            items = o[5] || '-';
-            total = o[6] || '0,00';
-            status = o[7] || 'Offen';
+            pickup = o[3] || '-';
+            items = o[4] || '-';
+            total = o[5] || '0,00';
+            status = o[6] || 'Offen';
           } else if (typeof o === 'object') {
-            // Falls Objekte zurückgegeben werden
-            name = o.name || o.studentName || o.Kunde || o.Name || '';
-            userClass = o.userClass || o.studentClass || o.Klasse || '';
-            pickup = o.pickup || o.pickupPause || o.Abholfenster || (o.pickupDate ? o.pickupDate + ' ' + (o.pickupPause || '') : '');
-            
-            if (Array.isArray(o.items)) {
-              items = o.items.join(', ');
-            } else {
-              items = o.items || o.Artikel || '';
-            }
-
-            total = o.total || o.totalPrice || o.Summe || '';
-            status = o.status || o.Status || 'Offen';
-            if (o.row) rowId = o.row;
+            // Wenn das Script Objekte liefert:
+            name = o.Name || o.name || o.studentName || '-';
+            userClass = o.Klasse || o.userClass || o.studentClass || '-';
+            pickup = o.Pause || o.pickup || o.pickupPause || '-';
+            items = Array.isArray(o.Artikel || o.items) ? (o.Artikel || o.items).join(', ') : (o.Artikel || o.items || '-');
+            total = o.Gesamtsumme || o.total || o.totalPrice || '0,00';
+            status = o.Status || o.status || 'Offen';
           }
 
-          // Filtern von Produktzeilen (falls getOrders aus Versehen die Produkt-Tabelle ausliest)
-          const isProductRow = !userClass && !pickup && !items;
-          if (isProductRow && name) {
-            return; // Zeile überspringen
-          }
+          // Überspringe Kopfzeile falls versehentlich mitgeliefert
+          if (name === "Name" || name === "Kunde") return;
 
-          renderCount++;
-
-          const isDone = String(status).trim().toLowerCase() === "abgeholt";
+          // Status auswerten: "E", "Abgeholt" oder "Erledigt" gelten als erledigt
+          const statusStr = String(status).trim();
+          const isDone = (statusStr === "E" || statusStr.toLowerCase() === "abgeholt" || statusStr.toLowerCase() === "erledigt");
 
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td><strong>${name || '-'}</strong></td>
-            <td>${userClass || '-'}</td>
-            <td>${pickup || '-'}</td>
-            <td>${items || '-'}</td>
-            <td><strong>${total ? total + ' €' : '-'}</strong></td>
+            <td><strong>${name}</strong></td>
+            <td>${userClass}</td>
+            <td>${pickup}</td>
+            <td>${items}</td>
+            <td><strong>${total.toString().includes('€') ? total : total + ' €'}</strong></td>
             <td><span class="status-badge ${isDone ? 'status-abgeholt' : 'status-offen'}">${isDone ? 'Abgeholt' : 'Offen'}</span></td>
             <td>
               ${isDone ? '✅ Erledigt' : `<button class="btn-success" onclick="markAsPickedUp(${rowId})">Als abgeholt markieren</button>`}
@@ -305,10 +296,6 @@
           `;
           tbody.appendChild(tr);
         });
-
-        if (renderCount === 0) {
-          tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Keine gültigen Bestellungen gefunden. Prüfe in Google Apps Script, ob getOrders auf das Tabellenblatt "Bestellungen" zugreift.</td></tr>';
-        }
 
       } catch (err) {
         console.error(err);
@@ -320,7 +307,7 @@
       try {
         await fetch(API_URL, {
           method: "POST",
-          body: JSON.stringify({ action: "updateStatus", row: rowId })
+          body: JSON.stringify({ action: "updateStatus", row: rowId, status: "E" })
         });
         loadKioskOrders();
       } catch (err) {

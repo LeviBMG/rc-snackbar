@@ -254,10 +254,9 @@
           let items = '';
           let total = '';
           let status = 'Offen';
-          let rowId = o.row || (index + 2); // Tabellenzeile ab A2
+          let rowId = o.row || (index + 2); // Tabellenzeile in Google Sheets
 
           if (Array.isArray(o)) {
-            // Wenn das Script Zeilen-Arrays liefert:
             // A: Zeitstempel (0), B: Name (1), C: Klasse (2), D: Pause (3), E: Artikel (4), F: Summe (5), G: Status (6)
             name = o[1] || '-';
             userClass = o[2] || '-';
@@ -266,7 +265,6 @@
             total = o[5] || '0,00';
             status = o[6] || 'Offen';
           } else if (typeof o === 'object') {
-            // Wenn das Script Objekte liefert:
             name = o.Name || o.name || o.studentName || '-';
             userClass = o.Klasse || o.userClass || o.studentClass || '-';
             pickup = o.Pause || o.pickup || o.pickupPause || '-';
@@ -275,10 +273,8 @@
             status = o.Status || o.status || 'Offen';
           }
 
-          // Überspringe Kopfzeile falls versehentlich mitgeliefert
           if (name === "Name" || name === "Kunde") return;
 
-          // Status auswerten: "E", "Abgeholt" oder "Erledigt" gelten als erledigt
           const statusStr = String(status).trim();
           const isDone = (statusStr === "E" || statusStr.toLowerCase() === "abgeholt" || statusStr.toLowerCase() === "erledigt");
 
@@ -305,12 +301,27 @@
 
     async function markAsPickedUp(rowId) {
       try {
+        // Sende POST-Request an Apps Script um Spalte G auf 'E' zu setzen
         await fetch(API_URL, {
           method: "POST",
-          body: JSON.stringify({ action: "updateStatus", row: rowId, status: "E" })
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            action: "updateStatus",
+            row: rowId,
+            status: "E"
+          })
         });
-        loadKioskOrders();
+
+        // Warten & Liste automatisch neu laden
+        setTimeout(() => {
+          loadKioskOrders();
+        }, 800);
+
       } catch (err) {
+        console.error(err);
         alert("Fehler beim Aktualisieren der Bestellung.");
       }
     }

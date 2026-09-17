@@ -287,7 +287,7 @@
     <div class="modal-card">
       <h3>AGBs & Rechtliche Hinweise</h3>
       <p><strong>RC-Snackbar eSG</strong><br>Schülergenossenschaft am Raiffeisen-Campus Gymnasium Dernbach.</p>
-      <p>Bestellungen über diese Plattform sind verbindlich. Die Abholung der Ware erfolgt strikt gegen Vorzeigen des generierten digitalen Kassenzettels (PDF) zum gewählten Verkaufsfenster.</p>
+      <p>Bestellungen über diese Plattform sind verbindlich. Es muss kein QR-Code vorgezeigt werden, die Bezahlung erfolgt direkt bei der Annahme der Ware zum gewählten Verkaufsfenster.</p>
       <button class="btn-primary" style="width: 100%; margin-top: 16px;" onclick="toggleAgbModal(false)">Schließen</button>
     </div>
   </div>
@@ -330,8 +330,10 @@
       const inputPin = prompt("Bitte Kiosk-PIN eingeben:");
       if (!inputPin) return;
 
-      const inputHash = await hashPin(inputPin);
-      if (inputHash === PIN_HASH) {
+      const cleanPin = inputPin.trim();
+      const inputHash = await hashPin(cleanPin);
+
+      if (inputHash.toLowerCase() === PIN_HASH.toLowerCase()) {
         showWindow('step-admin');
         loadKioskOrders();
       } else {
@@ -736,9 +738,9 @@
       yPos += 8;
       doc.setFontSize(7);
       doc.setFont("helvetica", "italic");
-      doc.text("Vielen Dank fuer deinen Einkauf bei der eSG!", 40, yPos, { align: "center" });
+      doc.text("Bezahlung erfolgt bei Annahme der Ware.", 40, yPos, { align: "center" });
       yPos += 4;
-      doc.text("Bitte zeige diesen Bon bei der Abholung vor.", 40, yPos, { align: "center" });
+      doc.text("Es muss kein QR-Code vorgezeigt werden.", 40, yPos, { align: "center" });
 
       doc.save(`Kassenzettel_${orderData.studentName.replace(/\s+/g, '_')}_${orderId}.pdf`);
     }

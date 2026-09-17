@@ -1,10 +1,17 @@
 <!DOCTYPE html>
 <html lang="de">
+<!--
+  =========================================================
+  RC-Snackbar eSG - Click & Collect Web-App
+  Version: Beta v0.9.7 (PWA Ready & UI Refined)
+  =========================================================
+-->
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RC-Snackbar eSG - Schulshop</title>
-  <!-- jsPDF Bibliothek -->
+  <meta name="theme-color" content="#1B2B4C">
+  <link rel="manifest" href="manifest.json">
+  <title>RC-Snackbar eSG - Schulshop (Beta v0.9.7)</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root {
@@ -21,20 +28,8 @@
       --radius: 12px;
     }
 
-    * {
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
 
     header {
       background: var(--card-bg);
@@ -48,339 +43,79 @@
       z-index: 100;
     }
 
-    .header-logo {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
+    .header-logo { display: flex; align-items: center; gap: 16px; }
+    .header-logo img { height: 48px; object-fit: contain; }
+    .header-title h1 { font-size: 1.2rem; font-weight: 800; color: var(--esg-navy); margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }
+    .header-title p { font-size: 0.75rem; color: var(--esg-grey); margin: 2px 0 0 0; font-weight: 600; }
 
-    .header-logo img {
-      height: 48px;
-      object-fit: contain;
-    }
+    .container { width: 100%; max-width: 1100px; margin: 24px auto; padding: 0 16px; flex: 1; }
+    .card { background: var(--card-bg); border-radius: var(--radius); padding: 24px; border: 1px solid var(--border); margin-bottom: 24px; box-shadow: 0 2px 8px rgba(27, 43, 76, 0.04); }
+    .card h2 { font-size: 1.15rem; color: var(--esg-navy); margin-top: 0; margin-bottom: 16px; border-bottom: 2px solid var(--esg-light-grey); padding-bottom: 8px; }
 
-    .header-title h1 {
-      font-size: 1.2rem;
-      font-weight: 800;
-      color: var(--esg-navy);
-      margin: 0;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
+    .news-banner { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; background: linear-gradient(135deg, #1B2B4C 0%, #2A4373 100%); color: white; border-radius: var(--radius); padding: 24px; margin-bottom: 24px; }
+    @media (max-width: 768px) { .news-banner { grid-template-columns: 1fr; } }
+    .news-content h3 { color: var(--esg-orange); margin-top: 0; font-size: 1.3rem; }
+    .news-content p { font-size: 0.9rem; line-height: 1.5; color: #E2E8F0; }
+    .news-poster { display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 8px; border: 1px dashed rgba(255, 255, 255, 0.3); }
+    .news-poster img { max-width: 100%; max-height: 160px; object-fit: contain; border-radius: 4px; }
 
-    .header-title p {
-      font-size: 0.75rem;
-      color: var(--esg-grey);
-      margin: 2px 0 0 0;
-      font-weight: 600;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 1100px;
-      margin: 24px auto;
-      padding: 0 16px;
-      flex: 1;
-    }
-
-    .card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      padding: 24px;
-      border: 1px solid var(--border);
-      margin-bottom: 24px;
-      box-shadow: 0 2px 8px rgba(27, 43, 76, 0.04);
-    }
-
-    .card h2 {
-      font-size: 1.15rem;
-      color: var(--esg-navy);
-      margin-top: 0;
-      margin-bottom: 16px;
-      border-bottom: 2px solid var(--esg-light-grey);
-      padding-bottom: 8px;
-    }
-
-    .news-banner {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 20px;
-      background: linear-gradient(135deg, #1B2B4C 0%, #2A4373 100%);
-      color: white;
-      border-radius: var(--radius);
-      padding: 24px;
-      margin-bottom: 24px;
-    }
-
-    @media (max-width: 768px) {
-      .news-banner { grid-template-columns: 1fr; }
-    }
-
-    .news-content h3 {
-      color: var(--esg-orange);
-      margin-top: 0;
-      font-size: 1.3rem;
-    }
-
-    .news-content p {
-      font-size: 0.9rem;
-      line-height: 1.5;
-      color: #E2E8F0;
-    }
-
-    .news-poster {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 8px;
-      padding: 8px;
-      border: 1px dashed rgba(255, 255, 255, 0.3);
-    }
-
-    .news-poster img {
-      max-width: 100%;
-      max-height: 160px;
-      object-fit: contain;
-      border-radius: 4px;
-    }
-
-    .product-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-    }
-
+    .product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
     @media (max-width: 900px) { .product-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 500px) { .product-grid { grid-template-columns: 1fr; } }
 
-    .product-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      text-align: center;
-      position: relative;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
+    .product-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; display: flex; flex-direction: column; justify-content: space-between; text-align: center; position: relative; transition: transform 0.2s, box-shadow 0.2s; }
+    .product-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(27, 43, 76, 0.08); }
+    .product-card.sold-out { opacity: 0.6; filter: grayscale(80%); }
 
-    .product-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(27, 43, 76, 0.08);
-    }
-
-    .product-card.sold-out {
-      opacity: 0.6;
-      filter: grayscale(80%);
-    }
-
-    .badge {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      font-size: 0.65rem;
-      font-weight: 800;
-      padding: 3px 8px;
-      border-radius: 6px;
-      text-transform: uppercase;
-    }
-
+    .badge { position: absolute; top: 10px; left: 10px; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; }
     .badge-action { background: var(--esg-orange); color: white; }
     .badge-out { background: #E53E3E; color: white; }
 
-    .product-img-wrap {
-      width: 100%;
-      height: 110px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 12px 0;
-    }
+    .product-img-wrap { width: 100%; height: 110px; display: flex; align-items: center; justify-content: center; margin: 12px 0; }
+    .product-img-wrap img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .product-title { font-size: 0.9rem; font-weight: 700; color: var(--esg-navy); min-height: 2.4em; display: flex; align-items: center; justify-content: center; }
+    .product-price { font-size: 1rem; font-weight: 800; color: var(--esg-orange); margin-bottom: 10px; }
 
-    .product-img-wrap img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-    }
-
-    .product-title {
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: var(--esg-navy);
-      min-height: 2.4em;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .product-price {
-      font-size: 1rem;
-      font-weight: 800;
-      color: var(--esg-orange);
-      margin-bottom: 10px;
-    }
-
-    .qty-controls {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .qty-btn {
-      background: var(--esg-light-grey);
-      border: 1px solid var(--border);
-      width: 32px;
-      height: 32px;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      color: var(--esg-navy);
-    }
-
+    .qty-controls { display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .qty-btn { background: var(--esg-light-grey); border: 1px solid var(--border); width: 32px; height: 32px; border-radius: 6px; font-weight: bold; cursor: pointer; color: var(--esg-navy); }
     .qty-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    .btn-primary {
-      background: var(--esg-orange);
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
+    .btn-primary { background: var(--esg-orange); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
     .btn-primary:hover { background: var(--esg-orange-hover); }
-
-    .btn-secondary {
-      background: none;
-      border: none;
-      color: var(--esg-grey);
-      cursor: pointer;
-      font-weight: 600;
-      padding: 0;
-    }
+    .btn-secondary { background: none; border: none; color: var(--esg-grey); cursor: pointer; font-weight: 600; padding: 0; }
 
     .form-group { margin-bottom: 16px; }
-
-    label {
-      display: block;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--esg-navy);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 0.95rem;
-      background: #FAFAFA;
-    }
+    label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--esg-navy); margin-bottom: 6px; text-transform: uppercase; }
+    input, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; background: #FAFAFA; }
 
     .hidden { display: none !important; }
 
-    .cart-bar {
-      position: sticky;
-      bottom: 16px;
-      background: var(--esg-navy);
-      color: white;
-      border-radius: var(--radius);
-      padding: 16px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    }
-
+    .cart-bar { position: sticky; bottom: 16px; background: var(--esg-navy); color: white; border-radius: var(--radius); padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
     .cart-info { display: flex; flex-direction: column; }
     .cart-total { font-size: 1.2rem; font-weight: 800; color: var(--esg-orange); }
     .cart-limit-hint { font-size: 0.75rem; color: #94A3B8; }
 
-    footer {
-      background: var(--card-bg);
-      border-top: 1px solid var(--border);
-      padding: 16px 24px;
-      margin-top: auto;
-      text-align: center;
-      font-size: 0.8rem;
-      color: var(--esg-grey);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+    footer { background: var(--card-bg); border-top: 1px solid var(--border); padding: 16px 24px; margin-top: auto; text-align: center; font-size: 0.8rem; color: var(--esg-grey); display: flex; justify-content: space-between; align-items: center; }
+    @media (max-width: 600px) { footer { flex-direction: column; gap: 8px; } }
 
-    @media (max-width: 600px) {
-      footer { flex-direction: column; gap: 8px; }
-    }
+    .btn-agb { background: none; border: 1px solid var(--esg-grey); color: var(--esg-navy); padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-weight: 600; }
+    .btn-agb:hover { background: var(--esg-light-grey); }
 
-    .btn-agb {
-      background: none;
-      border: 1px solid var(--esg-grey);
-      color: var(--esg-navy);
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .btn-agb:hover {
-      background: var(--esg-light-grey);
-    }
-
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(15, 23, 42, 0.6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 200;
-      padding: 16px;
-    }
-
-    .modal-card {
-      background: white;
-      border-radius: var(--radius);
-      max-width: 500px;
-      width: 100%;
-      padding: 24px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
-
-    .modal-card h3 {
-      margin-top: 0;
-      color: var(--esg-navy);
-    }
-
-    .modal-card p {
-      font-size: 0.85rem;
-      line-height: 1.5;
-      color: var(--text-muted);
-    }
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 16px; }
+    .modal-card { background: white; border-radius: var(--radius); max-width: 500px; width: 100%; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+    .modal-card h3 { margin-top: 0; color: var(--esg-navy); }
+    .modal-card p { font-size: 0.85rem; line-height: 1.5; color: var(--text-muted); }
 
     .login-box { max-width: 400px; margin: 40px auto; }
   </style>
 </head>
 <body>
 
-  <!-- HEADER -->
   <header>
     <div class="header-logo">
-      <img src="esg_logo.png" alt="eSG Logo" onerror="this.src='https://via.placeholder.com/120x50?text=eSG+Logo'">
+      <img src="esg_logo.png" alt="eSG Logo" onerror="this.src='https://via.placeholder.com/120x50?text=RC-Snackbar'">
       <div class="header-title">
-        <h1>RC-Snackbar eSG</h1>
+        <h1>RC-Snackbar eSG <span style="font-size: 0.7rem; color: var(--esg-orange); font-weight: normal;">Beta v0.9.7</span></h1>
         <p>Schülergenossenschaft Raiffeisen-Campus eSG</p>
       </div>
     </div>
@@ -394,7 +129,6 @@
 
   <div class="container">
 
-    <!-- FENSTER 1: LOGIN -->
     <div id="step-login" class="login-box">
       <div class="card">
         <h2 style="text-align: center;">WebUntis Verifizierung</h2>
@@ -411,7 +145,6 @@
             <input type="password" id="untisPass" placeholder="••••••••" required>
           </div>
           
-          <!-- KLASSENAUSWAHL 5a-9b & MSS 1-3 -->
           <div class="form-group">
             <label for="untisClass">Klasse / Stufe</label>
             <select id="untisClass" required>
@@ -440,16 +173,15 @@
       </div>
     </div>
 
-    <!-- FENSTER 2: PRODUKTE & SHOPPING -->
     <div id="step-selection" class="hidden">
 
       <div class="news-banner">
         <div class="news-content">
           <h3>📢 eSG News & Aktionen</h3>
-          <p>Willkommen im Click & Collect Shop der RC-Snackbar eSG! Bestelle deine Pausensnacks einfach vor und hole sie pünktlich ab. Achte auf unsere aktuellen Aktionsangebote!</p>
+          <p>Willkommen im Click & Collect Shop der RC-Snackbar eSG! Bestelle deine Pausensnacks einfach vor und hole sie pünktlich ab.</p>
         </div>
         <div class="news-poster">
-          <img src="poster_aktion.png" alt="Aktionsplakat" onerror="this.src='https://via.placeholder.com/200x120?text=Aktionsplakat+eSG'">
+          <img src="poster_aktion.png" alt="Aktionsplakat" onerror="this.src='https://via.placeholder.com/200x120?text=Aktion+eSG'">
         </div>
       </div>
 
@@ -473,7 +205,6 @@
 
     </div>
 
-    <!-- FENSTER 3: CHECKOUT & ABHOLUNG -->
     <div id="step-checkout" class="hidden">
       <button class="btn-secondary" onclick="backToSelection()" style="margin-bottom: 16px;">← Zurück zum Sortiment</button>
 
@@ -515,7 +246,6 @@
 
   </div>
 
-  <!-- AGB MODAL (POPUP) -->
   <div id="agb-modal" class="modal-overlay hidden">
     <div class="modal-card">
       <h3>AGBs & Rechtliche Hinweise</h3>
@@ -525,9 +255,8 @@
     </div>
   </div>
 
-  <!-- DEZENTE FUSSZEILE -->
   <footer>
-    <span>&copy; 2026 RC-Snackbar eSG – Raiffeisen-Campus Dernbach</span>
+    <span>&copy; 2026 RC-Snackbar eSG – Raiffeisen-Campus Dernbach (Beta v0.9.7)</span>
     <button class="btn-agb" onclick="toggleAgbModal(true)">AGBs & Rechtliches</button>
   </footer>
 
@@ -550,25 +279,18 @@
       }
     });
 
-    // PARSER FÜR NUMERISCHE PREISE
     function parsePrice(val) {
       if (val === undefined || val === null || val === '') return 0;
       if (typeof val === 'number' && !isNaN(val)) return val;
       
-      let cleanStr = String(val)
-        .replace(/[^0-9,-.]/g, '')
-        .replace(',', '.')
-        .trim();
-        
+      let cleanStr = String(val).replace(/[^0-9,-.]/g, '').replace(',', '.').trim();
       let num = parseFloat(cleanStr);
       return isNaN(num) ? 0 : num;
     }
 
     function toggleAgbModal(show) {
       const modal = document.getElementById('agb-modal');
-      if (modal) {
-        modal.classList.toggle('hidden', !show);
-      }
+      if (modal) modal.classList.toggle('hidden', !show);
     }
 
     function requireAuth() {
@@ -581,18 +303,13 @@
     }
 
     function showWindow(windowId) {
-      const stepLogin = document.getElementById('step-login');
-      const stepSelection = document.getElementById('step-selection');
-      const stepCheckout = document.getElementById('step-checkout');
-
-      if (stepLogin) stepLogin.classList.add('hidden');
-      if (stepSelection) stepSelection.classList.add('hidden');
-      if (stepCheckout) stepCheckout.classList.add('hidden');
+      ['step-login', 'step-selection', 'step-checkout'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
       
       const target = document.getElementById(windowId);
-      if (target) {
-        target.classList.remove('hidden');
-      }
+      if (target) target.classList.remove('hidden');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -684,25 +401,13 @@
 
       let options = [];
 
-      if (dayOfWeek === 1) { // MONTAG
-        options = [
-          "1. Pause",
-          "2. Pause",
-          "Mittagspause",
-          "6. Pause (Letzte Pause)"
-        ];
-      } else if (dayOfWeek >= 2 && dayOfWeek <= 4) { // DIENSTAG, MITTWOCH, DONNERSTAG
-        options = [
-          "1. Pause",
-          "2. Pause",
-          "Mittagspause"
-        ];
-      } else if (dayOfWeek === 5) { // FREITAG
-        options = [
-          "1. Pause",
-          "2. Pause"
-        ];
-      } else { // WOCHENENDE
+      if (dayOfWeek === 1) {
+        options = ["1. Pause", "2. Pause", "Mittagspause", "6. Pause (Letzte Pause)"];
+      } else if (dayOfWeek >= 2 && dayOfWeek <= 4) {
+        options = ["1. Pause", "2. Pause", "Mittagspause"];
+      } else if (dayOfWeek === 5) {
+        options = ["1. Pause", "2. Pause"];
+      } else {
         const el = document.createElement('option');
         el.value = "";
         el.innerText = "Am Wochenende findet kein Verkauf statt!";
@@ -720,17 +425,10 @@
 
     async function loadProducts() {
       try {
-        const res = await fetch(API_URL, {
-          method: "GET",
-          redirect: "follow"
-        });
-        
-        if (!res.ok) {
-          throw new Error(`HTTP-Fehler! Status: ${res.status}`);
-        }
+        const res = await fetch(API_URL, { method: "GET", redirect: "follow" });
+        if (!res.ok) throw new Error(`HTTP Status: ${res.status}`);
         
         const data = await res.json();
-        
         if (Array.isArray(data) && data.length > 0) {
           products = data;
           renderGrids();
@@ -755,7 +453,7 @@
         cartQuantities[idx] = cartQuantities[idx] || 0;
         const cardHtml = createProductCard(p, idx);
 
-        if (p.isAction || p.aktion || p.Aktion) {
+        if (p.isAction) {
           actionGrid.appendChild(cardHtml);
           hasActions = true;
         } else {
@@ -772,28 +470,25 @@
     function createProductCard(p, idx) {
       const card = document.createElement('div');
       
-      const rawPrice = p.price !== undefined ? p.price : (p.preis !== undefined ? p.preis : (p.Preis !== undefined ? p.Preis : p[1]));
-      const priceVal = parsePrice(rawPrice);
-
-      const stockVal = p.stock !== undefined ? p.stock : (p.bestand !== undefined ? p.bestand : p.Bestand);
-      const isSoldOut = stockVal !== undefined && Number(stockVal) <= 0;
+      const priceVal = parsePrice(p.price);
+      const isSoldOut = p.stock !== undefined && Number(p.stock) <= 0;
 
       card.className = `product-card ${isSoldOut ? 'sold-out' : ''}`;
       
       let badgeHtml = '';
       if (isSoldOut) {
         badgeHtml = '<span class="badge badge-out">Ausverkauft</span>';
-      } else if (p.isAction || p.aktion || p.Aktion) {
+      } else if (p.isAction) {
         badgeHtml = '<span class="badge badge-action">Aktion</span>';
       }
 
-      const nameVal = p.name || p.Name || p.titel || p[0] || "Produkt";
-      const imgVal = p.image || p.bild || p.Bild || p[4] || '';
+      const nameVal = p.name || "Produkt";
+      const imgVal = p.image || '';
 
       card.innerHTML = `
         ${badgeHtml}
         <div class="product-img-wrap">
-          <img src="${imgVal}" alt="${nameVal}" onerror="this.src='https://via.placeholder.com/150?text=Kein+Bild'">
+          <img src="${imgVal}" alt="${nameVal}" onerror="this.src='https://via.placeholder.com/150?text=Produktbild'">
         </div>
         <div class="product-title">${nameVal}</div>
         <div class="product-price">${priceVal.toFixed(2).replace('.', ',')} €</div>
@@ -811,8 +506,7 @@
 
       const p = products[idx];
       const current = cartQuantities[idx] || 0;
-      const stockVal = p.stock !== undefined ? p.stock : (p.bestand !== undefined ? p.bestand : p.Bestand);
-      const maxStock = stockVal !== undefined ? Number(stockVal) : 99;
+      const maxStock = p.stock !== undefined ? Number(p.stock) : 99;
 
       let next = current + change;
       if (next > maxStock) {
@@ -831,8 +525,7 @@
       let total = 0;
       products.forEach((p, idx) => {
         const qty = cartQuantities[idx] || 0;
-        const rawPrice = p.price !== undefined ? p.price : (p.preis !== undefined ? p.preis : (p.Preis !== undefined ? p.Preis : p[1]));
-        const priceVal = parsePrice(rawPrice);
+        const priceVal = parsePrice(p.price);
         total += qty * priceVal;
       });
 
@@ -866,9 +559,8 @@
         products.forEach((p, idx) => {
           const qty = cartQuantities[idx];
           if (qty > 0) {
-            const rawPrice = p.price !== undefined ? p.price : (p.preis !== undefined ? p.preis : (p.Preis !== undefined ? p.Preis : p[1]));
-            const priceVal = parsePrice(rawPrice);
-            const nameVal = p.name || p.Name || p.titel || p[0] || "Produkt";
+            const priceVal = parsePrice(p.price);
+            const nameVal = p.name || "Produkt";
             const itemRow = document.createElement('div');
             itemRow.style.cssText = "display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95rem;";
             itemRow.innerHTML = `
@@ -890,10 +582,7 @@
 
     function generateReceiptPDF(orderData) {
       const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({
-        unit: 'mm',
-        format: [80, 160]
-      });
+      const doc = new jsPDF({ unit: 'mm', format: [80, 160] });
 
       const orderId = "RC-" + Math.floor(100000 + Math.random() * 900000);
       const now = new Date().toLocaleString('de-DE');
@@ -957,7 +646,7 @@
       const selectedItems = [];
       products.forEach((p, idx) => {
         const qty = cartQuantities[idx];
-        const nameVal = p.name || p.Name || p.titel || p[0] || "Produkt";
+        const nameVal = p.name || "Produkt";
         for (let i = 0; i < qty; i++) {
           selectedItems.push(nameVal);
         }

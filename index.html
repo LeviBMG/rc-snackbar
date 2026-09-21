@@ -3,7 +3,7 @@
 <!--
   =========================================================
   RC-Snackbar eSG - Click & Collect Web-App
-  Version: Beta v1.2.0 (Apple-Look, Untis-Login & DIN A4)
+  Version: Beta v1.2.0 (Apple-Design + WebUntis Login)
   =========================================================
 -->
 <head>
@@ -45,7 +45,7 @@
       min-height: 100vh; 
     }
 
-    /* Apple-Style Header mit Blur-Effekt */
+    /* Modern Apple Glass Header */
     header {
       background: rgba(255, 255, 255, 0.8);
       backdrop-filter: blur(20px);
@@ -78,7 +78,7 @@
 
     .container { width: 100%; max-width: 1040px; margin: 32px auto; padding: 0 20px; flex: 1; }
 
-    /* Frosted-Glass Cards */
+    /* Apple-Style Cards */
     .card { 
       background: var(--card-bg); 
       backdrop-filter: blur(12px);
@@ -100,7 +100,7 @@
     /* DIN A4 Querformat Aktions-Banner */
     .news-banner { 
       display: grid; 
-      grid-template-columns: 1fr 1.414fr; /* DIN A4 Verhältnis */
+      grid-template-columns: 1fr 1.414fr; /* Exaktes DIN A4 Seitenverhältnis */
       gap: 24px; 
       background: linear-gradient(135deg, var(--esg-navy) 0%, #2C3E66 100%); 
       color: white; 
@@ -133,11 +133,12 @@
     }
     .news-poster img { width: 100%; height: 100%; object-fit: cover; }
 
-    /* Grid & Cards */
+    /* Product Grid */
     .product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
     @media (max-width: 900px) { .product-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 500px) { .product-grid { grid-template-columns: 1fr; } }
 
+    /* Product Cards */
     .product-card { 
       background: white; 
       border: 1px solid var(--card-border); 
@@ -193,7 +194,7 @@
     .qty-btn:disabled { opacity: 0.3; cursor: not-allowed; }
     .qty-display { font-weight: 600; font-size: 0.95rem; min-width: 20px; }
 
-    /* Orange Buttons */
+    /* Buttons */
     .btn-primary { 
       background: var(--esg-orange); 
       color: white; 
@@ -226,7 +227,7 @@
 
     .hidden { display: none !important; }
 
-    /* Apple-Style Cart-Bar */
+    /* Cart Bar */
     .cart-bar { 
       position: sticky; 
       bottom: 24px; 
@@ -335,7 +336,7 @@
       </div>
     </div>
 
-    <!-- Shop Sortimentsbereich -->
+    <!-- Shop-Auswahl nach erfolgreichem Login -->
     <div id="step-selection" class="hidden">
 
       <div class="news-banner">
@@ -387,11 +388,11 @@
         <form id="order-form" onsubmit="submitOrder(event)">
           <div class="form-group">
             <label>Verifizierter Name</label>
-            <input type="text" id="studentName" readonly style="background: #E2E8F0;">
+            <input type="text" id="studentName" readonly style="background: #F2F4F7; color: var(--text-muted);">
           </div>
           <div class="form-group">
             <label>Klasse</label>
-            <input type="text" id="studentClass" readonly style="background: #E2E8F0;">
+            <input type="text" id="studentClass" readonly style="background: #F2F4F7; color: var(--text-muted);">
           </div>
           <div class="form-group">
             <label for="pickupDate">Abholdatum</label>

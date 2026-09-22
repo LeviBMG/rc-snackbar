@@ -3,7 +3,7 @@
 <!--
   =========================================================
   RC-Snackbar eSG - Click & Collect Web-App
-  Version: Beta v0.9.8 (Integrierter Kiosk-Verkaufsbereich)
+  Version: Beta v0.9.8 (Reines Schüler-Frontend)
   =========================================================
 -->
 <head>
@@ -85,7 +85,6 @@
     .btn-primary { background: var(--esg-orange); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
     .btn-primary:hover { background: var(--esg-orange-hover); }
     .btn-secondary { background: none; border: none; color: var(--esg-grey); cursor: pointer; font-weight: 600; padding: 0; }
-    .btn-admin { background: var(--esg-navy); color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
 
     .form-group { margin-bottom: 16px; }
     label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--esg-navy); margin-bottom: 6px; text-transform: uppercase; }
@@ -97,15 +96,6 @@
     .cart-info { display: flex; flex-direction: column; }
     .cart-total { font-size: 1.2rem; font-weight: 800; color: var(--esg-orange); }
     .cart-limit-hint { font-size: 0.75rem; color: #94A3B8; }
-
-    /* Verkaufspanel Styles */
-    .order-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-    .order-table th, .order-table td { padding: 10px; border: 1px solid var(--border); text-align: left; font-size: 0.85rem; }
-    .order-table th { background: var(--esg-light-grey); color: var(--esg-navy); }
-    .status-badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; text-transform: uppercase; }
-    .status-offen { background: #FEF08A; color: #854D0E; }
-    .status-abgeholt { background: #DCFCE7; color: #166534; }
-    .btn-success { background: #22C55E; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
     footer { background: var(--card-bg); border-top: 1px solid var(--border); padding: 16px 24px; margin-top: auto; text-align: center; font-size: 0.8rem; color: var(--esg-grey); display: flex; justify-content: space-between; align-items: center; }
     @media (max-width: 600px) { footer { flex-direction: column; gap: 8px; } }
@@ -253,38 +243,8 @@
               <option value="">Bitte zuerst Datum wählen...</option>
             </select>
           </div>
-          <button type="submit" class="btn-primary" style="width: 100%;" id="submit-btn">Kostenpflichtig bestellen & Bestellbestätigung herunterladen</button>
+          <button type="submit" class="btn-primary" style="width: 100%;" id="submit-btn">Kostenpflichtig bestellen & Kassenzettel herunterladen</button>
         </form>
-      </div>
-    </div>
-
-    <!-- KIOSK / VERKAUFSPANEL -->
-    <div id="step-admin" class="hidden">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <button class="btn-secondary" onclick="showWindow('step-login')">← Zurück zum Shop</button>
-        <button class="btn-admin" onclick="loadKioskOrders()">🔄 Aktualisieren</button>
-      </div>
-
-      <div class="card">
-        <h2>Kiosk Verkaufspanel - Offene Bestellungen</h2>
-        <div style="overflow-x: auto;">
-          <table class="order-table">
-            <thead>
-              <tr>
-                <th>Kunde</th>
-                <th>Klasse</th>
-                <th>Abholfenster</th>
-                <th>Artikel</th>
-                <th>Summe</th>
-                <th>Status</th>
-                <th>Aktion</th>
-              </tr>
-            </thead>
-            <tbody id="kiosk-orders-list">
-              <tr><td colspan="7" style="text-align: center;">Lade Bestellungen...</td></tr>
-            </tbody>
-          </table>
-        </div>
       </div>
     </div>
 
@@ -308,8 +268,6 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbwEmZllT1fg5J1_YiSdAuQXwR-b_xlSmNztxIVme5mBo0Jf97EaFA-YxIYyCIKpf6I-qw/exec";
     const UNTIS_SCHOOL = "raiffeisen-campus";
     const UNTIS_SERVER = "raiffeisen-campus.webuntis.com";
-
-    const KIOSK_PIN = "1926"; // PIN für das Verkaufsteam
 
     const MIN_ORDER = 1.00;
     const MAX_ORDER = 21.50;
@@ -348,7 +306,7 @@
     }
 
     function showWindow(windowId) {
-      ['step-login', 'step-selection', 'step-checkout', 'step-admin'].forEach(id => {
+      ['step-login', 'step-selection', 'step-checkout'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
       });
@@ -356,64 +314,6 @@
       const target = document.getElementById(windowId);
       if (target) target.classList.remove('hidden');
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    /* KIOSK / VERKAUFSPANEL LOGIK */
-    function openAdminPanel() {
-      const pin = prompt("Bitte Kiosk-PIN eingeben:");
-      if (pin === KIOSK_PIN) {
-        showWindow('step-admin');
-        loadKioskOrders();
-      } else if (pin !== null) {
-        alert("Falsche PIN!");
-      }
-    }
-
-    async function loadKioskOrders() {
-      const tbody = document.getElementById('kiosk-orders-list');
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Lade aktuelle Bestellungen...</td></tr>';
-
-      try {
-        const res = await fetch(`${API_URL}?action=getOrders`);
-        const orders = await res.json();
-        
-        tbody.innerHTML = '';
-        if (!Array.isArray(orders) || orders.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Keine Bestellungen vorhanden.</td></tr>';
-          return;
-        }
-
-        orders.forEach(o => {
-          const tr = document.createElement('tr');
-          const isDone = o.status === "Abgeholt";
-          tr.innerHTML = `
-            <td><strong>${o.name}</strong></td>
-            <td>${o.userClass}</td>
-            <td>${o.pickup}</td>
-            <td>${o.items}</td>
-            <td><strong>${o.total} €</strong></td>
-            <td><span class="status-badge ${isDone ? 'status-abgeholt' : 'status-offen'}">${o.status}</span></td>
-            <td>
-              ${isDone ? '✅ Erledigt' : `<button class="btn-success" onclick="markAsPickedUp(${o.row})">Als abgeholt markieren</button>`}
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
-      } catch (err) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">Fehler beim Laden der Bestellungen.</td></tr>';
-      }
-    }
-
-    async function markAsPickedUp(rowId) {
-      try {
-        await fetch(API_URL, {
-          method: "POST",
-          body: JSON.stringify({ action: "updateStatus", row: rowId })
-        });
-        loadKioskOrders();
-      } catch (err) {
-        alert("Fehler beim Aktualisieren der Bestellung.");
-      }
     }
 
     async function handleLogin(e) {

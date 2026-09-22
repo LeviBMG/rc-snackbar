@@ -3,7 +3,7 @@
 <!--
   =========================================================
   RC-Snackbar eSG - Click & Collect Web-App
-  Version: Beta v0.9.8 (Reines Schüler-Frontend)
+  Version: Beta v0.9.9 (Mit Bestellbestätigung & AGB-Schutz)
   =========================================================
 -->
 <head>
@@ -11,7 +11,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#1B2B4C">
   <link rel="manifest" href="manifest.json">
-  <title>RC-Snackbar eSG - Schulshop (Beta v0.9.8)</title>
+  <title>RC-Snackbar eSG - Schulshop (Beta v0.9.9)</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root {
@@ -104,9 +104,10 @@
     .btn-agb:hover { background: var(--esg-light-grey); }
 
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 16px; }
-    .modal-card { background: white; border-radius: var(--radius); max-width: 500px; width: 100%; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+    .modal-card { background: white; border-radius: var(--radius); max-width: 550px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
     .modal-card h3 { margin-top: 0; color: var(--esg-navy); }
-    .modal-card p { font-size: 0.85rem; line-height: 1.5; color: var(--text-muted); }
+    .modal-card h4 { margin-top: 14px; margin-bottom: 4px; color: var(--esg-navy); font-size: 0.9rem; }
+    .modal-card p { font-size: 0.85rem; line-height: 1.5; color: var(--text-muted); margin-top: 4px; }
 
     .login-box { max-width: 400px; margin: 40px auto; }
   </style>
@@ -117,7 +118,7 @@
     <div class="header-logo">
       <img src="esg_logo.png" alt="eSG Logo" onerror="this.src='https://via.placeholder.com/120x50?text=RC-Snackbar'">
       <div class="header-title">
-        <h1>RC-Snackbar eSG <span style="font-size: 0.7rem; color: var(--esg-orange); font-weight: normal;">Beta v0.9.8</span></h1>
+        <h1>RC-Snackbar eSG <span style="font-size: 0.7rem; color: var(--esg-orange); font-weight: normal;">Beta v0.9.9</span></h1>
         <p>Schülergenossenschaft Raiffeisen-Campus eSG</p>
       </div>
     </div>
@@ -243,7 +244,7 @@
               <option value="">Bitte zuerst Datum wählen...</option>
             </select>
           </div>
-          <button type="submit" class="btn-primary" style="width: 100%;" id="submit-btn">Kostenpflichtig bestellen & Kassenzettel herunterladen</button>
+          <button type="submit" class="btn-primary" style="width: 100%;" id="submit-btn">Kostenpflichtig bestellen & Bestellbestätigung herunterladen</button>
         </form>
       </div>
     </div>
@@ -254,13 +255,25 @@
     <div class="modal-card">
       <h3>AGBs & Rechtliche Hinweise</h3>
       <p><strong>RC-Snackbar eSG</strong><br>Schülergenossenschaft am Raiffeisen-Campus Gymnasium Dernbach.</p>
-      <p>Bestellungen über diese Plattform sind verbindlich. Die Abholung der Ware erfolgt strikt gegen Vorzeigen des generierten digitalen Kassenzettels (PDF) zum gewählten Verkaufsfenster.</p>
-      <button class="btn-primary" style="width: 100%; margin-top: 16px;" onclick="toggleAgbModal(false)">Schließen</button>
+
+      <h4>§ 1 Verbindlichkeit der Bestellung</h4>
+      <p>Jede über das System abgeschickte Bestellung ist verbindlich. Die Bezahlung erfolgt bei Abholung an der RC-Snackbar.</p>
+
+      <h4>§ 2 Nachweis & Belegpflicht</h4>
+      <p>Nach Absenden der Bestellung wird automatisch eine digitale <strong>Bestellbestätigung (PDF)</strong> generiert. Im normalen Schulalltag ist ein Vorzeigen der Bestätigung nicht zwingend erforderlich, sofern dem Team die Person bekannt ist.</p>
+
+      <h4>§ 3 Betrugsverdacht & Vorzeigepflicht</h4>
+      <p>Das Team der RC-Snackbar behält sich das Recht vor, die Bestellbestätigung jederzeit bei Betrugsverdacht, Unstimmigkeiten oder im Rahmen von Stichproben einzufordern. Kann kein gültiger Nachweis erbracht werden, wird die Ware nicht ausgehändigt.</p>
+
+      <h4>§ 4 Täuschungsversuche & Konsequenzen</h4>
+      <p>Gefälschte oder mehrfach verwendete Bestellbestätigungen sowie die Angabe falscher Identitäten stellen einen Täuschungsversuch dar. Solche Verstöße werden umgehend der Schulleitung gemeldet und führen zum dauerhaften Ausschluss aus dem Bestellsystem der RC-Snackbar eSG.</p>
+
+      <button class="btn-primary" style="width: 100%; margin-top: 20px;" onclick="toggleAgbModal(false)">Schließen</button>
     </div>
   </div>
 
   <footer>
-    <span>&copy; 2026 RC-Snackbar eSG – Raiffeisen-Campus Dernbach (Beta v0.9.8)</span>
+    <span>&copy; 2026 RC-Snackbar eSG – Raiffeisen-Campus Dernbach (Beta v0.9.9)</span>
     <button class="btn-agb" onclick="toggleAgbModal(true)">AGBs & Rechtliches</button>
   </footer>
 
@@ -582,35 +595,39 @@
       showWindow('step-selection');
     }
 
-    function generateReceiptPDF(orderData) {
+    function generateConfirmationPDF(orderData) {
       const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ unit: 'mm', format: [80, 160] });
+      const doc = new jsPDF({ unit: 'mm', format: [80, 170] });
 
       const orderId = "RC-" + Math.floor(100000 + Math.random() * 900000);
       const now = new Date().toLocaleString('de-DE');
 
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(13);
-      doc.text("RC-SNACKBAR eSG", 40, 12, { align: "center" });
+      doc.setFontSize(12);
+      doc.text("RC-SNACKBAR eSG", 40, 10, { align: "center" });
 
-      doc.setFontSize(8);
-      doc.setFont("helvetica", "normal");
-      doc.text("Raiffeisen-Campus Dernbach eSG", 40, 16, { align: "center" });
-      doc.text("--------------------------------------------------", 40, 20, { align: "center" });
-
-      doc.setFontSize(8);
-      doc.text(`Bestell-Nr: ${orderId}`, 6, 25);
-      doc.text(`Datum: ${now}`, 6, 29);
-      doc.text(`Kunde: ${orderData.studentName}`, 6, 33);
-      doc.text(`Klasse: ${orderData.studentClass}`, 6, 37);
-      doc.text(`Abholdatum: ${orderData.pickupDate}`, 6, 41);
-      doc.text(`Verkaufsfenster:`, 6, 45);
+      doc.setFontSize(9);
       doc.setFont("helvetica", "bold");
-      doc.text(`${orderData.pickupPause}`, 6, 49);
-      doc.setFont("helvetica", "normal");
-      doc.text("--------------------------------------------------", 40, 53, { align: "center" });
+      doc.text("BESTELLBESTAETIGUNG", 40, 15, { align: "center" });
 
-      let yPos = 58;
+      doc.setFontSize(7);
+      doc.setFont("helvetica", "normal");
+      doc.text("Raiffeisen-Campus Dernbach eSG", 40, 19, { align: "center" });
+      doc.text("--------------------------------------------------", 40, 23, { align: "center" });
+
+      doc.setFontSize(8);
+      doc.text(`Bestell-Nr: ${orderId}`, 6, 28);
+      doc.text(`Datum: ${now}`, 6, 32);
+      doc.text(`Kunde: ${orderData.studentName}`, 6, 36);
+      doc.text(`Klasse: ${orderData.studentClass}`, 6, 40);
+      doc.text(`Abholdatum: ${orderData.pickupDate}`, 6, 44);
+      doc.text(`Verkaufsfenster:`, 6, 48);
+      doc.setFont("helvetica", "bold");
+      doc.text(`${orderData.pickupPause}`, 6, 52);
+      doc.setFont("helvetica", "normal");
+      doc.text("--------------------------------------------------", 40, 56, { align: "center" });
+
+      let yPos = 61;
       doc.setFont("helvetica", "bold");
       doc.text("Artikel", 6, yPos);
       doc.text("Summe", 74, yPos, { align: "right" });
@@ -627,17 +644,27 @@
 
       doc.setFontSize(10);
       doc.setFont("helvetica", "bold");
-      doc.text("GESAMT:", 6, yPos);
+      doc.text("GESAMTBETRAG:", 6, yPos);
       doc.text(`${orderData.totalPrice} €`, 74, yPos, { align: "right" });
 
       yPos += 8;
+      doc.setFontSize(6.5);
+      doc.setFont("helvetica", "bold");
+      doc.text("HINWEIS ZUR ABHOLUNG:", 6, yPos);
+      yPos += 3.5;
+      doc.setFont("helvetica", "normal");
+      doc.text("Du musst diesen Beleg nicht immer vorzeigen.", 6, yPos);
+      yPos += 3.5;
+      doc.text("Bei Betrugsverdacht oder auf Verlangen des", 6, yPos);
+      yPos += 3.5;
+      doc.text("Teams muess dieser Beleg vorgezeigt werden.", 6, yPos);
+
+      yPos += 6;
       doc.setFontSize(7);
       doc.setFont("helvetica", "italic");
-      doc.text("Vielen Dank fuer deinen Einkauf bei der eSG!", 40, yPos, { align: "center" });
-      yPos += 4;
-      doc.text("Bitte zeige diesen Bon bei der Abholung vor.", 40, yPos, { align: "center" });
+      doc.text("Vielen Dank fuer deine Bestellung!", 40, yPos, { align: "center" });
 
-      doc.save(`Kassenzettel_${orderData.studentName.replace(/\s+/g, '_')}_${orderId}.pdf`);
+      doc.save(`Bestellbestaetigung_${orderData.studentName.replace(/\s+/g, '_')}_${orderId}.pdf`);
     }
 
     async function submitOrder(e) {
@@ -678,8 +705,8 @@
 
         const result = await res.json();
         if (result.status === "success") {
-          generateReceiptPDF(payload);
-          alert("Bestellung erfolgreich aufgegeben! Dein Kassenzettel-PDF wurde heruntergeladen.");
+          generateConfirmationPDF(payload);
+          alert("Bestellung erfolgreich aufgegeben! Deine Bestellbestätigung (PDF) wurde heruntergeladen.");
           cartQuantities = {};
           renderGrids();
           calculateTotal();
@@ -692,7 +719,7 @@
         alert("Netzwerkfehler beim Absenden der Bestellung.");
       } finally {
         submitBtn.disabled = false;
-        submitBtn.innerText = "Kostenpflichtig bestellen & Kassenzettel herunterladen";
+        submitBtn.innerText = "Kostenpflichtig bestellen & Bestellbestätigung herunterladen";
       }
     }
   </script>

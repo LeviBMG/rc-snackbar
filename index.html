@@ -3,7 +3,7 @@
 <!--
   =========================================================
   RC-Snackbar eSG - Click & Collect Web-App
-  Version: Beta v0.9.9 (Mit Bestellbestätigung & AGB-Schutz)
+  Version: Beta v1.0.0
   =========================================================
 -->
 <head>
@@ -11,7 +11,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#1B2B4C">
   <link rel="manifest" href="manifest.json">
-  <title>RC-Snackbar eSG - Schulshop (Beta v0.9.9)</title>
+  <title>RC-Snackbar eSG - Schulshop</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root {
@@ -118,7 +118,7 @@
     <div class="header-logo">
       <img src="esg_logo.png" alt="eSG Logo" onerror="this.src='https://via.placeholder.com/120x50?text=RC-Snackbar'">
       <div class="header-title">
-        <h1>RC-Snackbar eSG <span style="font-size: 0.7rem; color: var(--esg-orange); font-weight: normal;">Beta v0.9.9</span></h1>
+        <h1>RC-Snackbar eSG <span style="font-size: 0.7rem; color: var(--esg-orange); font-weight: normal;">Beta v1.0.0</span></h1>
         <p>Schülergenossenschaft Raiffeisen-Campus eSG</p>
       </div>
     </div>
@@ -138,7 +138,7 @@
       <div class="card">
         <h2 style="text-align: center;">WebUntis Verifizierung</h2>
         <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
-          Authentifizierung für Mitglieder & Schüler des Raiffeisen-Campus Dernbach.
+          Authentifizierung für Schüler des Raiffeisen-Campus Dernbach.
         </p>
         <form id="login-form" onsubmit="handleLogin(event)">
           <div class="form-group">
@@ -273,14 +273,12 @@
   </div>
 
   <footer>
-    <span>&copy; 2026 RC-Snackbar eSG – Raiffeisen-Campus Dernbach (Beta v0.9.9)</span>
+    <span>&copy; 2026 RC-Snackbar eSG – Raiffeisen-Campus Dernbach (Beta v1.0.0)</span>
     <button class="btn-agb" onclick="toggleAgbModal(true)">AGBs & Rechtliches</button>
   </footer>
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwEmZllT1fg5J1_YiSdAuQXwR-b_xlSmNztxIVme5mBo0Jf97EaFA-YxIYyCIKpf6I-qw/exec";
-    const UNTIS_SCHOOL = "raiffeisen-campus";
-    const UNTIS_SERVER = "raiffeisen-campus.webuntis.com";
 
     const MIN_ORDER = 1.00;
     const MAX_ORDER = 21.50;
@@ -348,23 +346,20 @@
       btn.disabled = true;
 
       try {
-        const untisUrl = `https://${UNTIS_SERVER}/WebUntis/jsonrpc.do?school=${UNTIS_SCHOOL}`;
-        const payload = {
-          id: "rc_snackbar_auth",
-          method: "authenticate",
-          params: { user: username, password: password, client: "RC_Snackbar" },
-          jsonrpc: "2.0"
-        };
-
-        const res = await fetch(untisUrl, {
+        // Authentifizierung wird sicher über das Google Apps Script Backend ausgeführt
+        const res = await fetch(API_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify({
+            action: "authenticate",
+            username: username,
+            password: password
+          })
         });
 
         const data = await res.json();
 
-        if (data.result && data.result.sessionId) {
+        if (data.success) {
           currentUser = {
             username: username,
             name: username.replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase()),
@@ -372,15 +367,17 @@
           };
           setupUserSession();
         } else {
-          if (errEl) errEl.classList.remove('hidden');
+          if (errEl) {
+            errEl.innerText = data.error || "Anmeldung fehlgeschlagen: Zugangsdaten falsch.";
+            errEl.classList.remove('hidden');
+          }
         }
       } catch (err) {
-        currentUser = {
-          username: username,
-          name: username.replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase()),
-          userClass: userClass
-        };
-        setupUserSession();
+        console.error("Login-Fehler:", err);
+        if (errEl) {
+          errEl.innerText = "Netzwerkfehler bei der Anmeldung. Bitte erneut versuchen.";
+          errEl.classList.remove('hidden');
+        }
       } finally {
         btn.innerText = "Anmelden & eSG Shop betreten";
         btn.disabled = false;
@@ -698,23 +695,21 @@
       submitBtn.innerText = "Bestellung wird übermittelt...";
 
       try {
-        const res = await fetch(API_URL, {
+        await fetch(API_URL, {
           method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain" },
           body: JSON.stringify(payload)
         });
 
-        const result = await res.json();
-        if (result.status === "success") {
-          generateConfirmationPDF(payload);
-          alert("Bestellung erfolgreich aufgegeben! Deine Bestellbestätigung (PDF) wurde heruntergeladen.");
-          cartQuantities = {};
-          renderGrids();
-          calculateTotal();
-          document.getElementById('order-form').reset();
-          showWindow('step-selection');
-        } else {
-          alert("Fehler bei der Bestellung. Bitte versuche es erneut.");
-        }
+        generateConfirmationPDF(payload);
+        alert("Bestellung erfolgreich aufgegeben! Deine Bestellbestätigung (PDF) wurde heruntergeladen.");
+        cartQuantities = {};
+        renderGrids();
+        calculateTotal();
+        document.getElementById('order-form').reset();
+        showWindow('step-selection');
+
       } catch (err) {
         alert("Netzwerkfehler beim Absenden der Bestellung.");
       } finally {

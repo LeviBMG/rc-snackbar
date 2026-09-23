@@ -3,7 +3,7 @@
 <!--
   =========================================================
   RC-Snackbar eSG - Click & Collect Web-App
-  Version: Beta v1.0.0
+  Version: Beta v1.0.4 (Mit Schüler-Verifizierung & AGBs)
   =========================================================
 -->
 <head>
@@ -118,7 +118,7 @@
     <div class="header-logo">
       <img src="esg_logo.png" alt="eSG Logo" onerror="this.src='https://via.placeholder.com/120x50?text=RC-Snackbar'">
       <div class="header-title">
-        <h1>RC-Snackbar eSG <span style="font-size: 0.7rem; color: var(--esg-orange); font-weight: normal;">Beta v1.0.0</span></h1>
+        <h1>RC-Snackbar eSG <span style="font-size: 0.7rem; color: var(--esg-orange); font-weight: normal;">Beta v1.0.4</span></h1>
         <p>Schülergenossenschaft Raiffeisen-Campus eSG</p>
       </div>
     </div>
@@ -136,18 +136,14 @@
 
     <div id="step-login" class="login-box">
       <div class="card">
-        <h2 style="text-align: center;">WebUntis Verifizierung</h2>
+        <h2 style="text-align: center;">Schüler Anmeldung</h2>
         <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
-          Authentifizierung für Schüler des Raiffeisen-Campus Dernbach.
+          Gib bitte deinen vollständigen Namen und deine Klasse ein.
         </p>
         <form id="login-form" onsubmit="handleLogin(event)">
           <div class="form-group">
-            <label for="untisUser">WebUntis Benutzername</label>
-            <input type="text" id="untisUser" placeholder="vorname.nachname" required>
-          </div>
-          <div class="form-group">
-            <label for="untisPass">Passwort</label>
-            <input type="password" id="untisPass" placeholder="••••••••" required>
+            <label for="studentNameInput">Vor- und Nachname</label>
+            <input type="text" id="studentNameInput" placeholder="z. B. Max Mustermann" required>
           </div>
           
           <div class="form-group">
@@ -171,7 +167,7 @@
           </div>
 
           <div id="login-error" style="color: #E53E3E; font-size: 0.85rem; margin-bottom: 10px;" class="hidden">
-            Anmeldung fehlgeschlagen. Bitte Zugangsdaten prüfen.
+            Name oder Klasse nicht gefunden.
           </div>
           <button type="submit" class="btn-primary" style="width: 100%;" id="login-btn">Anmelden & eSG Shop betreten</button>
         </form>
@@ -259,21 +255,21 @@
       <h4>§ 1 Verbindlichkeit der Bestellung</h4>
       <p>Jede über das System abgeschickte Bestellung ist verbindlich. Die Bezahlung erfolgt bei Abholung an der RC-Snackbar.</p>
 
-      <h4>§ 2 Nachweis & Belegpflicht</h4>
-      <p>Nach Absenden der Bestellung wird automatisch eine digitale <strong>Bestellbestätigung (PDF)</strong> generiert. Im normalen Schulalltag ist ein Vorzeigen der Bestätigung nicht zwingend erforderlich, sofern dem Team die Person bekannt ist.</p>
+      <h4>§ 2 Verbot von Identitätsdiebstahl & Falschangaben</h4>
+      <p>Es ist strengstens untersagt, Bestellungen unter fremdem Namen oder mit gefälschten Angaben aufzugeben. Jede Bestellung wird mit dem registrierten Schülerverzeichnis abgeglichen.</p>
 
-      <h4>§ 3 Betrugsverdacht & Vorzeigepflicht</h4>
-      <p>Das Team der RC-Snackbar behält sich das Recht vor, die Bestellbestätigung jederzeit bei Betrugsverdacht, Unstimmigkeiten oder im Rahmen von Stichproben einzufordern. Kann kein gültiger Nachweis erbracht werden, wird die Ware nicht ausgehändigt.</p>
+      <h4>§ 3 Täuschungsversuche & Konsequenzen</h4>
+      <p>Die vorsätzliche Eingabe eines fremden Namens, gefälschte Bestellbestätigungen sowie versuchter Betrug stellen einen schweren Verstoß dar. Solche Handlungen werden führen zum temporären/dauerhaften Ausschluss vom Bestellsystem.</p>
 
-      <h4>§ 4 Täuschungsversuche & Konsequenzen</h4>
-      <p>Gefälschte oder mehrfach verwendete Bestellbestätigungen sowie die Angabe falscher Identitäten stellen einen Täuschungsversuch dar. Solche Verstöße werden umgehend der Schulleitung gemeldet und führen zum dauerhaften Ausschluss aus dem Bestellsystem der RC-Snackbar eSG.</p>
+      <h4>§ 4 Vorzeigepflicht bei Verdacht</h4>
+      <p>Das Team der RC-Snackbar behält sich das Recht vor, die digitale Bestellbestätigung (PDF) jederzeit bei Unstimmigkeiten einzufordern. Kann kein Nachweis erbracht werden, wird die Ware nicht ausgehändigt.</p>
 
       <button class="btn-primary" style="width: 100%; margin-top: 20px;" onclick="toggleAgbModal(false)">Schließen</button>
     </div>
   </div>
 
   <footer>
-    <span>&copy; 2026 RC-Snackbar eSG – Raiffeisen-Campus Dernbach (Beta v1.0.0)</span>
+    <span>&copy; 2026 RC-Snackbar eSG – Raiffeisen-Campus Dernbach (Beta v1.0.4)</span>
     <button class="btn-agb" onclick="toggleAgbModal(true)">AGBs & Rechtliches</button>
   </footer>
 
@@ -309,7 +305,7 @@
 
     function requireAuth() {
       if (!currentUser) {
-        alert("Aktion verweigert: Bitte melde dich zuerst über WebUntis an!");
+        alert("Aktion verweigert: Bitte melde dich zuerst mit deinem Namen und deiner Klasse an!");
         showWindow('step-login');
         return false;
       }
@@ -333,27 +329,25 @@
       const errEl = document.getElementById('login-error');
       if (errEl) errEl.classList.add('hidden');
 
-      const username = document.getElementById('untisUser').value.trim();
-      const password = document.getElementById('untisPass').value;
+      const username = document.getElementById('studentNameInput').value.trim();
       const userClass = document.getElementById('untisClass').value;
 
-      if (!username || !password || !userClass) {
-        alert("Bitte fülle alle Felder aus!");
+      if (!username || !userClass) {
+        alert("Bitte gib deinen Namen und deine Klasse an!");
         return;
       }
 
-      btn.innerText = "Verifiziere mit WebUntis...";
+      btn.innerText = "Verifiziere Schülerdaten...";
       btn.disabled = true;
 
       try {
-        // Authentifizierung wird sicher über das Google Apps Script Backend ausgeführt
         const res = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain" },
           body: JSON.stringify({
-            action: "authenticate",
+            action: "verifyStudent",
             username: username,
-            password: password
+            userClass: userClass
           })
         });
 
@@ -361,21 +355,20 @@
 
         if (data.success) {
           currentUser = {
-            username: username,
-            name: username.replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase()),
-            userClass: userClass
+            name: data.officialName,
+            userClass: data.officialClass
           };
           setupUserSession();
         } else {
           if (errEl) {
-            errEl.innerText = data.error || "Anmeldung fehlgeschlagen: Zugangsdaten falsch.";
+            errEl.innerText = data.error || "Name oder Klasse nicht in der Schülerliste gefunden.";
             errEl.classList.remove('hidden');
           }
         }
       } catch (err) {
-        console.error("Login-Fehler:", err);
+        console.error("Verifizierungsfehler:", err);
         if (errEl) {
-          errEl.innerText = "Netzwerkfehler bei der Anmeldung. Bitte erneut versuchen.";
+          errEl.innerText = "Netzwerkfehler bei der Verifizierung. Bitte erneut versuchen.";
           errEl.classList.remove('hidden');
         }
       } finally {

@@ -3,7 +3,7 @@
 <!--
   =========================================================
   RC-Snackbar eSG - Click & Collect Web-App
-  Version: Beta v1.0.4 (Mit Schüler-Verifizierung & AGBs)
+  Version: Beta v1.0.8
   =========================================================
 -->
 <head>
@@ -118,7 +118,7 @@
     <div class="header-logo">
       <img src="esg_logo.png" alt="eSG Logo" onerror="this.src='https://via.placeholder.com/120x50?text=RC-Snackbar'">
       <div class="header-title">
-        <h1>RC-Snackbar eSG <span style="font-size: 0.7rem; color: var(--esg-orange); font-weight: normal;">Beta v1.0.4</span></h1>
+        <h1>RC-Snackbar eSG <span style="font-size: 0.7rem; color: var(--esg-orange); font-weight: normal;">Beta v1.0.8</span></h1>
         <p>Schülergenossenschaft Raiffeisen-Campus eSG</p>
       </div>
     </div>
@@ -167,7 +167,7 @@
           </div>
 
           <div id="login-error" style="color: #E53E3E; font-size: 0.85rem; margin-bottom: 10px;" class="hidden">
-            Name oder Klasse nicht gefunden.
+            Name oder Klasse nicht in der Schülerliste gefunden.
           </div>
           <button type="submit" class="btn-primary" style="width: 100%;" id="login-btn">Anmelden & eSG Shop betreten</button>
         </form>
@@ -259,7 +259,7 @@
       <p>Es ist strengstens untersagt, Bestellungen unter fremdem Namen oder mit gefälschten Angaben aufzugeben. Jede Bestellung wird mit dem registrierten Schülerverzeichnis abgeglichen.</p>
 
       <h4>§ 3 Täuschungsversuche & Konsequenzen</h4>
-      <p>Die vorsätzliche Eingabe eines fremden Namens, gefälschte Bestellbestätigungen sowie versuchter Betrug stellen einen schweren Verstoß dar. Solche Handlungen werden führen zum temporären/dauerhaften Ausschluss vom Bestellsystem.</p>
+      <p>Die vorsätzliche Eingabe eines fremden Namens, gefälschte Bestellbestätigungen sowie versuchter Betrug stellen einen schweren Verstoß dar. Solche Handlungen werden umgehend der Schulleitung gemeldet und führen zum dauerhaften Ausschluss vom Bestellsystem.</p>
 
       <h4>§ 4 Vorzeigepflicht bei Verdacht</h4>
       <p>Das Team der RC-Snackbar behält sich das Recht vor, die digitale Bestellbestätigung (PDF) jederzeit bei Unstimmigkeiten einzufordern. Kann kein Nachweis erbracht werden, wird die Ware nicht ausgehändigt.</p>
@@ -269,7 +269,7 @@
   </div>
 
   <footer>
-    <span>&copy; 2026 RC-Snackbar eSG – Raiffeisen-Campus Dernbach (Beta v1.0.4)</span>
+    <span>&copy; 2026 RC-Snackbar eSG – Raiffeisen-Campus Dernbach (Beta v1.0.8)</span>
     <button class="btn-agb" onclick="toggleAgbModal(true)">AGBs & Rechtliches</button>
   </footer>
 
@@ -305,7 +305,7 @@
 
     function requireAuth() {
       if (!currentUser) {
-        alert("Aktion verweigert: Bitte melde dich zuerst mit deinem Namen und deiner Klasse an!");
+        alert("Aktion verweigert: Bitte melde dich zuerst an!");
         showWindow('step-login');
         return false;
       }
@@ -341,16 +341,9 @@
       btn.disabled = true;
 
       try {
-        const res = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain" },
-          body: JSON.stringify({
-            action: "verifyStudent",
-            username: username,
-            userClass: userClass
-          })
-        });
-
+        // Rein lesender GET-Aufruf (löst niemals einen Tabelleneintrag aus)
+        const verifyUrl = `${API_URL}?action=verifyStudent&username=${encodeURIComponent(username)}&userClass=${encodeURIComponent(userClass)}`;
+        const res = await fetch(verifyUrl, { method: "GET" });
         const data = await res.json();
 
         if (data.success) {
@@ -670,6 +663,11 @@
           selectedItems.push(nameVal);
         }
       });
+
+      if (selectedItems.length === 0) {
+        alert("Dein Einkaufswagen ist leer!");
+        return;
+      }
 
       const pickupDate = document.getElementById('pickupDate').value;
       const pickupPause = document.getElementById('pickupPause').value;

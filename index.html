@@ -3,7 +3,7 @@
 <!--
   =========================================================
   RC-Snackbar eSG - Click & Collect Web-App
-  Version: Beta v1.0.8
+  Version: Beta v1.1.0 (Direkter Login & AGB-Schutz)
   =========================================================
 -->
 <head>
@@ -118,7 +118,7 @@
     <div class="header-logo">
       <img src="esg_logo.png" alt="eSG Logo" onerror="this.src='https://via.placeholder.com/120x50?text=RC-Snackbar'">
       <div class="header-title">
-        <h1>RC-Snackbar eSG <span style="font-size: 0.7rem; color: var(--esg-orange); font-weight: normal;">Beta v1.0.8</span></h1>
+        <h1>RC-Snackbar eSG <span style="font-size: 0.7rem; color: var(--esg-orange); font-weight: normal;">Beta v1.1.0</span></h1>
         <p>Schülergenossenschaft Raiffeisen-Campus eSG</p>
       </div>
     </div>
@@ -138,12 +138,12 @@
       <div class="card">
         <h2 style="text-align: center;">Schüler Anmeldung</h2>
         <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
-          Gib bitte deinen vollständigen Namen und deine Klasse ein.
+          Gib bitte deinen Vor- und Nachnamen sowie deine Klasse an.
         </p>
         <form id="login-form" onsubmit="handleLogin(event)">
           <div class="form-group">
             <label for="studentNameInput">Vor- und Nachname</label>
-            <input type="text" id="studentNameInput" placeholder="z. B. Max Mustermann" required>
+            <input type="text" id="studentNameInput" placeholder="z. B. Levi Geimer" required>
           </div>
           
           <div class="form-group">
@@ -166,9 +166,6 @@
             </select>
           </div>
 
-          <div id="login-error" style="color: #E53E3E; font-size: 0.85rem; margin-bottom: 10px;" class="hidden">
-            Name oder Klasse nicht in der Schülerliste gefunden.
-          </div>
           <button type="submit" class="btn-primary" style="width: 100%;" id="login-btn">Anmelden & eSG Shop betreten</button>
         </form>
       </div>
@@ -223,7 +220,7 @@
         <h2>Abholdatum & Pausenzeiten wählen</h2>
         <form id="order-form" onsubmit="submitOrder(event)">
           <div class="form-group">
-            <label>Verifizierter Name</label>
+            <label>Name</label>
             <input type="text" id="studentName" readonly style="background: #E2E8F0;">
           </div>
           <div class="form-group">
@@ -255,21 +252,21 @@
       <h4>§ 1 Verbindlichkeit der Bestellung</h4>
       <p>Jede über das System abgeschickte Bestellung ist verbindlich. Die Bezahlung erfolgt bei Abholung an der RC-Snackbar.</p>
 
-      <h4>§ 2 Verbot von Identitätsdiebstahl & Falschangaben</h4>
-      <p>Es ist strengstens untersagt, Bestellungen unter fremdem Namen oder mit gefälschten Angaben aufzugeben. Jede Bestellung wird mit dem registrierten Schülerverzeichnis abgeglichen.</p>
+      <h4>§ 2 Namensangabe & Identität</h4>
+      <p>Bestellungen dürfen ausschließlich unter dem eigenen Vor- und Nachnamen getätigt werden. Die Angabe falscher Namen stellt einen Täuschungsversuch dar.</p>
 
       <h4>§ 3 Täuschungsversuche & Konsequenzen</h4>
-      <p>Die vorsätzliche Eingabe eines fremden Namens, gefälschte Bestellbestätigungen sowie versuchter Betrug stellen einen schweren Verstoß dar. Solche Handlungen werden umgehend der Schulleitung gemeldet und führen zum dauerhaften Ausschluss vom Bestellsystem.</p>
+      <p>Die Angabe fremder Namen, die Vorlage gefälschter Bestellbestätigungen sowie versuchter Betrug werden umgehend der Schulleitung gemeldet und führen zum dauerhaften Ausschluss vom Bestellsystem.</p>
 
       <h4>§ 4 Vorzeigepflicht bei Verdacht</h4>
-      <p>Das Team der RC-Snackbar behält sich das Recht vor, die digitale Bestellbestätigung (PDF) jederzeit bei Unstimmigkeiten einzufordern. Kann kein Nachweis erbracht werden, wird die Ware nicht ausgehändigt.</p>
+      <p>Das Team der RC-Snackbar behält sich das Recht vor, die digitale Bestellbestätigung (PDF) oder einen Schülerausweis bei Abholung einzufordern.</p>
 
       <button class="btn-primary" style="width: 100%; margin-top: 20px;" onclick="toggleAgbModal(false)">Schließen</button>
     </div>
   </div>
 
   <footer>
-    <span>&copy; 2026 RC-Snackbar eSG – Raiffeisen-Campus Dernbach (Beta v1.0.8)</span>
+    <span>&copy; 2026 RC-Snackbar eSG – Raiffeisen-Campus Dernbach (Beta v1.1.0)</span>
     <button class="btn-agb" onclick="toggleAgbModal(true)">AGBs & Rechtliches</button>
   </footer>
 
@@ -323,51 +320,27 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    async function handleLogin(e) {
+    function handleLogin(e) {
       e.preventDefault();
-      const btn = document.getElementById('login-btn');
-      const errEl = document.getElementById('login-error');
-      if (errEl) errEl.classList.add('hidden');
-
-      const username = document.getElementById('studentNameInput').value.trim();
+      const rawName = document.getElementById('studentNameInput').value.trim();
       const userClass = document.getElementById('untisClass').value;
 
-      if (!username || !userClass) {
+      if (!rawName || !userClass) {
         alert("Bitte gib deinen Namen und deine Klasse an!");
         return;
       }
 
-      btn.innerText = "Verifiziere Schülerdaten...";
-      btn.disabled = true;
+      // Formatierung des Namens (z. B. "levi geimer" -> "Levi Geimer")
+      const formattedName = rawName.split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
 
-      try {
-        // Rein lesender GET-Aufruf (löst niemals einen Tabelleneintrag aus)
-        const verifyUrl = `${API_URL}?action=verifyStudent&username=${encodeURIComponent(username)}&userClass=${encodeURIComponent(userClass)}`;
-        const res = await fetch(verifyUrl, { method: "GET" });
-        const data = await res.json();
+      currentUser = {
+        name: formattedName,
+        userClass: userClass
+      };
 
-        if (data.success) {
-          currentUser = {
-            name: data.officialName,
-            userClass: data.officialClass
-          };
-          setupUserSession();
-        } else {
-          if (errEl) {
-            errEl.innerText = data.error || "Name oder Klasse nicht in der Schülerliste gefunden.";
-            errEl.classList.remove('hidden');
-          }
-        }
-      } catch (err) {
-        console.error("Verifizierungsfehler:", err);
-        if (errEl) {
-          errEl.innerText = "Netzwerkfehler bei der Verifizierung. Bitte erneut versuchen.";
-          errEl.classList.remove('hidden');
-        }
-      } finally {
-        btn.innerText = "Anmelden & eSG Shop betreten";
-        btn.disabled = false;
-      }
+      setupUserSession();
     }
 
     function setupUserSession() {
@@ -640,7 +613,7 @@
       yPos += 3.5;
       doc.text("Bei Betrugsverdacht oder auf Verlangen des", 6, yPos);
       yPos += 3.5;
-      doc.text("Teams muess dieser Beleg vorgezeigt werden.", 6, yPos);
+      doc.text("Teams muss dieser Beleg vorgezeigt werden.", 6, yPos);
 
       yPos += 6;
       doc.setFontSize(7);
